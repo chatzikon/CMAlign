@@ -1,6 +1,19 @@
-FROM python:3.12-slim
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 WORKDIR /app
+
+# 1️⃣ Install Python + pip
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2️⃣ Make python = python3
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# 3️⃣ Upgrade pip
+RUN pip3 install --upgrade pip
 
 # Install system deps (optional but useful for PIL / torch)
 RUN apt-get update && apt-get install -y \
