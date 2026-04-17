@@ -1,0 +1,9 @@
+services:
+  api:
+    build: .
+    container_name: multimodal-api
+    ports:
+      - "4523:4523"
+    environment:
+      - API_BEARER_TOKEN=my-secret-token
+    restart: unless-stopped
