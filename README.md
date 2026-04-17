@@ -91,19 +91,6 @@ http://localhost:4523/docs
 
 ---
 
-## 🔁 Port Configuration
-
-The container runs internally on port `8000`, but is exposed externally on port `4523`:
-
-```yaml
-ports:
-  - "4523:8000"
-```
-
-This allows running multiple services without port conflicts.
-
----
-
 ## 📡 API Endpoints
 
 ### 🔹 GET `/`
@@ -185,7 +172,7 @@ This significantly improves performance compared to loading the model per reques
 ## 🐳 Docker Details
 
 * Base image: `python:3.12-slim`
-* Internal port: `8000`
+* Internal port: `4523`
 * External port: `4523`
 * Dependencies installed via `requirements.txt`
 
@@ -204,16 +191,6 @@ This significantly improves performance compared to loading the model per reques
 * The current setup uses a simple shared token for authentication.
 * HTTPS and advanced authentication (e.g., OpenID Connect) can be added in future improvements.
 * Model loading may take time during container startup.
-
----
-
-## ✅ Future Improvements
-
-* Replace static token with JWT / OIDC authentication
-* Add HTTPS support via reverse proxy
-* Implement request rate limiting
-* Add logging and monitoring
-* Optimize model inference performance
 
 ---
 
