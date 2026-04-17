@@ -4,6 +4,14 @@ services:
     container_name: multimodal-api
     ports:
       - "4523:4523"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    volumes:
+      - /home/chatziko/PycharmProjects/PythonProject/Multimodal-VAE/results:/app/checkpoints
     environment:
       - API_BEARER_TOKEN=my-secret-token
+      - HF_TOKEN=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
     restart: unless-stopped

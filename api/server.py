@@ -19,16 +19,25 @@ from contextlib import asynccontextmanager
 model = None
 tokenizer = None
 
-app = FastAPI(title="Cross-modal Align API")
+
 
 # ---- Lifespan (load model once) ----
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model, tokenizer
+
     print("Loading model...")
     model, tokenizer = load_model()
-    print("Model loaded successfully")
+
+    print("MODEL TYPE:", type(model))
+    print("TOKENIZER TYPE:", type(tokenizer))
+
+    if model is None:
+        raise RuntimeError("❌ Model is None → load_model() failed")
+
     yield
+
+app = FastAPI(lifespan=lifespan, title="Multimodal Image API")
 
 # Use an environment variable in practice
 API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN", "my-secret-token")

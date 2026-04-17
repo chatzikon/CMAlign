@@ -2,7 +2,6 @@ import torch
 from models.vae import MultimodalVAE
 from transformers import  AutoTokenizer
 
-
 class Tokenizer:
     def __init__(self, max_length, tokenizer) -> None:
         self.tokenizer = tokenizer
@@ -27,9 +26,11 @@ def load_model():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device for evaluation: {device}")
 
-    model_checkpoint=('/home/chatziko/PycharmProjects/PythonProject/Multimodal-VAE/results/'
-                      'results_flickr_both_modalities_kl_1_latent_dim_var/latent_64/'
-                      'final_model_kl_coef_1.0_lr_0.01_latent_dim_64.pt')
+    # model_checkpoint=('/home/chatziko/PycharmProjects/PythonProject/Multimodal-VAE/results/'
+    #                   'results_flickr_both_modalities_kl_1_latent_dim_var/latent_64/'
+    #                   'final_model_kl_coef_1.0_lr_0.01_latent_dim_64.pt')
+    model_checkpoint = ("/app/checkpoints/results_flickr_both_modalities_kl_1_latent_dim_var/latent_64/"
+                        "final_model_kl_coef_1.0_lr_0.01_latent_dim_64.pt")
     checkpoint = torch.load(model_checkpoint, map_location=device, weights_only=False)
 
     num_attributes=32
