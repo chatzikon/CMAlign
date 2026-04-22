@@ -94,8 +94,8 @@ async def image_to_text(
 
     #caption = "A dog running through a grassy field."
 
-    return {"tool_name":"CMAlign", "store_misp": False,
-            "text": {"caption": caption}, "filename": file.filename, "date_iso8601": date_iso8601}
+    return {"tool_name":"CMAlign", "in_id":'afr55', "in_filename": file.filename, "image":True, "store_misp": False,
+            "description": {"frame_start":1, "frame_end":1, "text": caption}, "date_iso8601": date_iso8601}
 
 
 @app.post("/text-to-image")
