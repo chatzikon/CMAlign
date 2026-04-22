@@ -3,6 +3,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from imageio.config.plugins import des
 from torchvision.models import vgg16, VGG16_Weights
 
 from models.components import ResidualBlock, ResidualLinear
@@ -660,7 +661,7 @@ class MultimodalVAE(nn.Module):
             if len(descriptions) == 1:
                 return descriptions[0]
 
-        return descriptions
+        return ' '.join(descriptions)
 
     def sample_latent(self, batch_size=1):
         device = next(self.parameters()).device

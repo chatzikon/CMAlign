@@ -1,6 +1,7 @@
 fastapi
 uvicorn[standard]
 pillow
+imageio
 torch==2.9.0
 torchvision==0.24.0
 python-multipart
