@@ -1,0 +1,112 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/utils/_validators.py:205: UserWarning: The `local_dir_use_symlinks` argument is deprecated and ignored in `hf_hub_download`. Downloading to a local directory does not use symlinks anymore.
+  warnings.warn(
+Working with z of shape (1, 13, 16, 16) = 3328 dimensions.
+Look-up free quantizer with codebook size: 8192
+Loading weights: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 391/391 [00:00<00:00, 35251.56it/s]
+[transformers] [1mCLIPVisionModel LOAD REPORT[0m from: openai/clip-vit-large-patch14-336
+Key                                                          | Status     | Details
+-------------------------------------------------------------+------------+--------
+text_model.encoder.layers.{0...11}.layer_norm2.bias          | [38;5;208mUNEXPECTED[0m |
+visual_projection.weight                                     | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.layer_norm2.weight        | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.layer_norm1.weight        | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.out_proj.bias   | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.mlp.fc2.bias              | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.q_proj.weight   | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.k_proj.weight   | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.v_proj.weight   | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.mlp.fc1.weight            | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.k_proj.bias     | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.mlp.fc2.weight            | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.mlp.fc1.bias              | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.v_proj.bias     | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.layer_norm1.bias          | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.q_proj.bias     | [38;5;208mUNEXPECTED[0m |
+text_model.encoder.layers.{0...11}.self_attn.out_proj.weight | [38;5;208mUNEXPECTED[0m |
+text_model.embeddings.token_embedding.weight                 | [38;5;208mUNEXPECTED[0m |
+logit_scale                                                  | [38;5;208mUNEXPECTED[0m |
+text_model.final_layer_norm.weight                           | [38;5;208mUNEXPECTED[0m |
+text_model.final_layer_norm.bias                             | [38;5;208mUNEXPECTED[0m |
+text_projection.weight                                       | [38;5;208mUNEXPECTED[0m |
+text_model.embeddings.position_embedding.weight              | [38;5;208mUNEXPECTED[0m |
+
+Notes:
+- [38;5;208mUNEXPECTED:[0m	[3mcan be ignored when loading from different task/architecture; not ok if you expect identical arch.[0m
+model.safetensors:   0%|                                                                                                                                                       | 0.00/1.71G [00:00<?, ?B/s]The config attributes {'mask_token_id': 58497} were passed to Showo, but are not expected and will be ignored. Please verify your config.json configuration file.
+model.safetensors:   0%|                                                                                                                                                       | 0.00/1.71G [00:01<?, ?B/s][transformers] PhiForCausalLM has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+attention implementation:  sdpa
+Traceback (most recent call last):
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/inference_mmu.py", line 77, in <module>
+    model = Showo.from_pretrained(config.model.showo.pretrained_model_path).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/modeling_utils.py", line 734, in from_pretrained
+    model = cls.from_config(config, **unused_kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/diffusers/configuration_utils.py", line 260, in from_config
+    model = cls(**init_dict)
+            ^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/diffusers/configuration_utils.py", line 653, in inner_init
+    init(self, *args, **init_kwargs)
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/modeling_showo.py", line 43, in __init__
+    self.showo = PhiForCausalLM(config)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 1090, in __init__
+    self.model = PhiModel(config)
+                 ^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 935, in __init__
+    [PhiDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 935, in <listcomp>
+    [PhiDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 742, in __init__
+    self.self_attn = PHI_ATTENTION_CLASSES[config._attn_implementation](config, layer_idx=layer_idx)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 619, in __init__
+    super().__init__(*args, **kwargs)
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/phi.py", line 249, in __init__
+    self.rope_theta = config.rope_theta
+                      ^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/transformers/configuration_utils.py", line 432, in __getattribute__
+    return super().__getattribute__(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'PhiConfig' object has no attribute 'rope_theta'
+model.safetensors:  35%|██████████████████████████████████████████████████▍                                                                                            | 604M/1.71G [00:13<00:25, 43.9MB/s]
+Exception in thread Thread-auto_conversion:
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.11/threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/transformers/safetensors_conversion.py", line 113, in auto_conversion
+    resolved_archive_file = cached_file(pretrained_model_name_or_path, filename, **cached_file_kwargs)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/transformers/utils/hub.py", line 278, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/transformers/utils/hub.py", line 422, in cached_files
+    hf_hub_download(
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/file_download.py", line 997, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/file_download.py", line 1216, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/file_download.py", line 1842, in _download_to_tmp_and_move
+    xet_get(
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/file_download.py", line 558, in xet_get
+    download_files(
+KeyboardInterrupt
+Exception ignored in: <module 'threading' from '/usr/lib/python3.11/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.11/threading.py", line 1590, in _shutdown
+    lock.acquire()
+KeyboardInterrupt:

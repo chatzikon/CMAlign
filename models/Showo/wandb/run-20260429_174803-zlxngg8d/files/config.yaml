@@ -1,0 +1,139 @@
+_wandb:
+    value:
+        cli_version: 0.26.1
+        e:
+            4qxe14bj18heb2fatn960getz0twbja9:
+                args:
+                    - config=configs/showo_demo_w_clip_vit_512x512.yaml
+                    - max_new_tokens=100
+                    - mmu_image_root=./mmu_validation
+                    - question=Please describe this image in detail. *** Do you think the image is unusual or not?
+                codePath: inference_mmu.py
+                codePathLocal: inference_mmu.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "1887976378368"
+                        used: "733610024960"
+                email: chatzikon.christos@gmail.com
+                executable: /home/chatziko/showo_env/bin/python3
+                git:
+                    commit: 45a5a2de01d1ebd10cd5864d29310a76476cdf23
+                    remote: https://github.com/showlab/Show-o.git
+                gpu: NVIDIA GeForce RTX 5080
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Blackwell
+                      cudaCores: 10752
+                      memoryTotal: "17094934528"
+                      name: NVIDIA GeForce RTX 5080
+                      uuid: GPU-e3e1de67-c346-dfce-8a9b-2b9b05889037
+                host: iti-500
+                memory:
+                    total: "33581006848"
+                os: Linux-6.17.0-19-generic-x86_64-with-glibc2.39
+                program: /home/chatziko/PycharmProjects/PythonProject/Show-o/inference_mmu.py
+                python: CPython 3.11.15
+                root: /home/chatziko/PycharmProjects/PythonProject/Show-o
+                startedAt: "2026-04-29T14:48:03.830416Z"
+                writerId: 4qxe14bj18heb2fatn960getz0twbja9
+        m: []
+        python_version: 3.11.15
+        t:
+            "1":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 71
+                - 83
+            "2":
+                - 1
+                - 11
+                - 41
+                - 49
+                - 71
+                - 83
+            "3":
+                - 13
+                - 16
+                - 61
+            "4": 3.11.15
+            "5": 0.26.1
+            "6": 4.41.1
+            "12": 0.26.1
+            "13": linux-x86_64
+config:
+    value: configs/showo_demo_w_clip_vit_512x512.yaml
+dataset.gen_type:
+    value: t2i
+dataset.params.batch_size:
+    value: 20
+dataset.params.num_workers:
+    value: 32
+dataset.params.persistent_workers:
+    value: true
+dataset.params.pin_memory:
+    value: true
+dataset.params.resolution:
+    value: 512
+dataset.params.shuffle_buffer_size:
+    value: 1000
+dataset.preprocessing.center_crop:
+    value: false
+dataset.preprocessing.max_seq_length:
+    value: 128
+dataset.preprocessing.random_flip:
+    value: false
+dataset.preprocessing.resolution:
+    value: 512
+dataset.und_type:
+    value: captioning
+experiment.name:
+    value: show-o-demo
+experiment.output_dir:
+    value: show-o-demo
+experiment.project:
+    value: demo
+max_new_tokens:
+    value: 100
+mmu_image_root:
+    value: ./mmu_validation
+model.gradient_checkpointing:
+    value: true
+model.showo.codebook_size:
+    value: 8192
+model.showo.llm_model_path:
+    value: microsoft/phi-1_5
+model.showo.llm_vocab_size:
+    value: 50295
+model.showo.num_new_special_tokens:
+    value: 10
+model.showo.num_vq_tokens:
+    value: 1024
+model.showo.pretrained_model_path:
+    value: showlab/show-o-w-clip-vit-512x512
+model.showo.vocab_size:
+    value: 58498
+model.showo.w_clip_vit:
+    value: true
+model.vq_model.type:
+    value: magvitv2
+model.vq_model.vq_model_name:
+    value: showlab/magvitv2
+question:
+    value: Please describe this image in detail. *** Do you think the image is unusual or not?
+training.batch_size:
+    value: 20
+training.cond_dropout_prob:
+    value: 0.1
+training.gradient_accumulation_steps:
+    value: 1
+wandb.entity:
+    value: null
+wandb.resume:
+    value: auto
+wandb.run_id:
+    value: f999r0qe

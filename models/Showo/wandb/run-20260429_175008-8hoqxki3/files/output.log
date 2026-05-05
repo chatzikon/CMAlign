@@ -1,0 +1,18 @@
+[34m[1mwandb[0m: Detected [huggingface_hub.inference] in use.
+[34m[1mwandb[0m: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+[34m[1mwandb[0m: For more information, check out the docs at: https://weave-docs.wandb.ai
+Working with z of shape (1, 13, 16, 16) = 3328 dimensions.
+Look-up free quantizer with codebook size: 8192
+/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/file_download.py:1132: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+The config attributes {'mask_token_id': 58497} were passed to Showo, but are not expected and will be ignored. Please verify your config.json configuration file.
+attention implementation:  sdpa
+/home/chatziko/PycharmProjects/PythonProject/Show-o/models/modeling_showo.py:49: FutureWarning: Accessing config attribute `w_clip_vit` directly via 'Showo' object attribute is deprecated. Please access 'w_clip_vit' over 'Showo's config object instead, e.g. 'unet.config.w_clip_vit'.
+  if self.w_clip_vit:
+  0%|                                                                                                                                                                                | 0/2 [00:00<?, ?it/s]/home/chatziko/PycharmProjects/PythonProject/Show-o/inference_mmu.py:122: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.detach().clone() or sourceTensor.detach().clone().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  input_ids = torch.tensor(input_ids).to(device).squeeze(0)
+[' The image features a dog standing in a field of tall grass and flowers. The dog is sniffing a flower, possibly enjoying the scent or trying to find a treat. The field is filled with various flowers, creating a beautiful and vibrant scene. The dog is positioned towards the center of the field, surrounded by the flowers and grass.']
+[" The image is unusual because it features a dog standing in a field of flowers, with the dog smelling a flower. Dogs are not typically associated with flowers or natural environments, and their presence in a field of flowers is unexpected and unexpected. The dog's behavior of smelling the flower adds an element of curiosity and playfulness to the scene, making it an interesting and unique image."]
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:26<00:00, 13.12s/it]
+[' The image features a surreal and dreamlike scene with a couch and a chair placed on a beach. The couch is positioned towards the left side of the image, while the chair is situated on the right side. Both the couch and the chair are surrounded by a variety of decorative elements, such as potted plants, vases, and a bowl. \n\nThere are several potted plants scattered throughout the scene, with some placed near the couch and others near the chair. A vase can']
+[' The image is unusual because it features a living room scene with a couch and a chair, but instead of a typical living room setting, it is set in an underwater environment. This is not a common sight, as living rooms are usually indoors and not designed to be submerged in water. The presence of a couch and a chair in an underwater setting is unexpected and adds an element of surrealism to the scene.']

@@ -1,0 +1,46 @@
+{
+  "os":  "Linux-6.17.0-19-generic-x86_64-with-glibc2.39",
+  "python":  "CPython 3.11.15",
+  "startedAt":  "2026-04-29T14:37:51.288230Z",
+  "args":  [
+    "config=configs/showo_demo_w_clip_vit_512x512.yaml",
+    "max_new_tokens=100",
+    "mmu_image_root=./mmu_validation",
+    "question=Please describe this image in detail. *** Do you think the image is unusual or not?"
+  ],
+  "program":  "/home/chatziko/PycharmProjects/PythonProject/Show-o/inference_mmu.py",
+  "codePath":  "inference_mmu.py",
+  "codePathLocal":  "inference_mmu.py",
+  "git":  {
+    "remote":  "https://github.com/showlab/Show-o.git",
+    "commit":  "45a5a2de01d1ebd10cd5864d29310a76476cdf23"
+  },
+  "email":  "chatzikon.christos@gmail.com",
+  "root":  "/home/chatziko/PycharmProjects/PythonProject/Show-o",
+  "host":  "iti-500",
+  "executable":  "/home/chatziko/showo_env/bin/python3",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "gpu":  "NVIDIA GeForce RTX 5080",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "1887976378368",
+      "used":  "733042782208"
+    }
+  },
+  "memory":  {
+    "total":  "33581006848"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 5080",
+      "memoryTotal":  "17094934528",
+      "cudaCores":  10752,
+      "architecture":  "Blackwell",
+      "uuid":  "GPU-e3e1de67-c346-dfce-8a9b-2b9b05889037"
+    }
+  ],
+  "cudaVersion":  "13.0",
+  "writerId":  "duz04hadgbfsl1218807o5mdpolwve1n"
+}
