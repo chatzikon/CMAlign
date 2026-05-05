@@ -6,38 +6,25 @@ import io
 import os
 
 
-from models.load_model import load_model
 from models.image_to_text import  img_to_txt
-from models.text_to_image import  txt_to_img
-from torchvision import transforms
 
-from fastapi import Response
 import datetime
 from contextlib import asynccontextmanager
+
+from models.showo_service import ShowoService
+from models.Showo.training.utils import get_config
 
 # ---- Globals for model ----
 model = None
 tokenizer = None
 
+#config = get_config("configs/showo_demo_w_clip_vit_512x512.yaml")
+config = get_config()
 
 
-# ---- Lifespan (load model once) ----
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global model, tokenizer
+showo = ShowoService(config)
 
-    print("Loading model...")
-    model, tokenizer = load_model()
-
-    print("MODEL TYPE:", type(model))
-    print("TOKENIZER TYPE:", type(tokenizer))
-
-    if model is None:
-        raise RuntimeError("❌ Model is None → load_model() failed")
-
-    yield
-
-app = FastAPI(lifespan=lifespan, title="Multimodal Image API")
+app = FastAPI(title="Multimodal Image API")
 
 # Use an environment variable in practice
 API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN", "my-secret-token")
@@ -71,53 +58,25 @@ class TextToImageRequest(BaseModel):
 
 
 @app.post("/image-to-text")
-async def image_to_text(
-    file: UploadFile,
-    token: str = Depends(verify_bearer_token),
-):
-
+async def image_to_text(file: UploadFile):
     image_bytes = await file.read()
-    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    transform = transforms.Compose(
-        [
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-        ]
-    )
-    image_t=transform(image)
-    # Call your model here
-    #model,tokenizer=load_model()
+    image = Image.open(io.BytesIO(image_bytes))
 
-    caption=img_to_txt(image_t,model,tokenizer)
+    caption = showo.image_to_text(
+        image,
+        question="Please describe this image in detail."
+    )
 
     date_iso8601=datetime.datetime.now().isoformat()
 
-    #caption = "A dog running through a grassy field."
 
-    return {"tool_name":"CMAlign", "in_id":'afr55', "in_filename": file.filename, "image":True, "store_misp": False,
-            "description": {"frame_start":1, "frame_end":1, "text": caption}, "date_iso8601": date_iso8601}
-
-
-@app.post("/text-to-image")
-async def text_to_image(
-    data: dict,
-    token: str = Depends(verify_bearer_token),
-):
-
-    prompt = data["prompt"]
-
-    # Call your model here
-    #model, tokenizer = load_model()
-
-    image=txt_to_img(model, tokenizer, prompt)
-
-    image_t = transforms.ToPILImage()(image.squeeze(0))
-
-    # save image to an in-memory bytes buffer
-    with io.BytesIO() as buf:
-        image_t.save(buf,  format='PNG')
-        im_bytes = buf.getvalue()
-
-    headers = {'Content-Disposition': 'inline; filename="test.png"'}
-
-    return Response(im_bytes, headers=headers, media_type='image/png')
+    return {
+        "tool_name": "CMAlign",
+        "text": {"caption": caption},
+        "in_id": 'afr55',
+        "in_filename": file.filename,
+        "image": True,
+        "store_misp": False,
+        "description": {"frame_start": 1, "frame_end": 1, "text": caption},
+        "date_iso8601": date_iso8601
+    }
