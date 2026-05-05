@@ -1,0 +1,21 @@
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_setup.py:_flush():81] Current SDK version is 0.26.1
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_setup.py:_flush():81] Configure stats pid to 632281
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_init.py:setup_run_log_directory():723] Logging user logs to /home/chatziko/PycharmProjects/PythonProject/Show-o/wandb/run-20260429_173708-05260eea/logs/debug.log
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_init.py:setup_run_log_directory():724] Logging internal logs to /home/chatziko/PycharmProjects/PythonProject/Show-o/wandb/run-20260429_173708-05260eea/logs/debug-internal.log
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_init.py:init():850] calling init triggers
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_init.py:init():855] wandb.init called with sweep_config: {}
+config: {'wandb.entity': None, 'wandb.resume': 'auto', 'wandb.run_id': 'ururl5d7', 'experiment.project': 'demo', 'experiment.name': 'show-o-demo', 'experiment.output_dir': 'show-o-demo', 'model.vq_model.type': 'magvitv2', 'model.vq_model.vq_model_name': 'showlab/magvitv2', 'model.showo.pretrained_model_path': 'showlab/show-o-w-clip-vit-512x512', 'model.showo.w_clip_vit': True, 'model.showo.vocab_size': 58498, 'model.showo.llm_vocab_size': 50295, 'model.showo.llm_model_path': 'microsoft/phi-1_5', 'model.showo.codebook_size': 8192, 'model.showo.num_vq_tokens': 1024, 'model.showo.num_new_special_tokens': 10, 'model.gradient_checkpointing': True, 'dataset.gen_type': 't2i', 'dataset.und_type': 'captioning', 'dataset.params.batch_size': 20, 'dataset.params.shuffle_buffer_size': 1000, 'dataset.params.num_workers': 32, 'dataset.params.resolution': 512, 'dataset.params.pin_memory': True, 'dataset.params.persistent_workers': True, 'dataset.preprocessing.max_seq_length': 128, 'dataset.preprocessing.resolution': 512, 'dataset.preprocessing.center_crop': False, 'dataset.preprocessing.random_flip': False, 'training.gradient_accumulation_steps': 1, 'training.cond_dropout_prob': 0.1, 'training.batch_size': 20, 'config': 'configs/showo_demo_w_clip_vit_512x512.yaml', 'max_new_tokens': 100, 'mmu_image_root': './mmu_validation', 'question': 'Please describe this image in detail. *** Do you think the image is unusual or not?', '_wandb': {}}
+2026-04-29 17:37:08,735 INFO    MainThread:632281 [wandb_init.py:init():898] starting backend
+2026-04-29 17:37:08,962 INFO    MainThread:632281 [wandb_init.py:init():913] sending inform_init request
+2026-04-29 17:37:09,399 INFO    MainThread:632281 [wandb_init.py:init():918] backend started and connected
+2026-04-29 17:37:09,405 INFO    MainThread:632281 [wandb_init.py:init():988] updated telemetry
+2026-04-29 17:37:09,408 INFO    MainThread:632281 [wandb_init.py:init():1011] communicating run to backend with 90.0 second timeout
+2026-04-29 17:37:10,630 INFO    MainThread:632281 [wandb_init.py:init():1056] starting run threads in backend
+2026-04-29 17:37:10,749 INFO    MainThread:632281 [wandb_run.py:_console_start():2554] atexit reg
+2026-04-29 17:37:10,749 INFO    MainThread:632281 [wandb_run.py:_redirect():2403] redirect: wrap_raw
+2026-04-29 17:37:10,749 INFO    MainThread:632281 [wandb_run.py:_redirect():2472] Wrapping output streams.
+2026-04-29 17:37:10,749 INFO    MainThread:632281 [wandb_run.py:_redirect():2495] Redirects installed.
+2026-04-29 17:37:10,751 INFO    MainThread:632281 [wandb_init.py:init():1094] run started, returning control to user process
+2026-04-29 17:37:12,471 INFO    wandb-AsyncioManager-main:632281 [service_client.py:_forward_responses():134] Reached EOF.
+2026-04-29 17:37:12,471 INFO    wandb-AsyncioManager-main:632281 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.

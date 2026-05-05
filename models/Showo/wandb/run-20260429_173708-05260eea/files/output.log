@@ -1,0 +1,16 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/utils/_validators.py:205: UserWarning: The `local_dir_use_symlinks` argument is deprecated and ignored in `hf_hub_download`. Downloading to a local directory does not use symlinks anymore.
+  warnings.warn(
+Working with z of shape (1, 13, 16, 16) = 3328 dimensions.
+Look-up free quantizer with codebook size: 8192
+Traceback (most recent call last):
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/inference_mmu.py", line 69, in <module>
+    vq_model = vq_model.from_pretrained(config.model.vq_model.vq_model_name).to(device)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/showo_env/lib/python3.11/site-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/chatziko/PycharmProjects/PythonProject/Show-o/models/modeling_utils.py", line 739, in from_pretrained
+    state_dict = load_state_dict(model_file, variant=variant)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: load_state_dict() got an unexpected keyword argument 'variant'
