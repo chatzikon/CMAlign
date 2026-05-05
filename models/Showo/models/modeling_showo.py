@@ -46,7 +46,7 @@ class Showo(ModelMixin, ConfigMixin):
         self.showo.resize_token_embeddings(self.vocab_size)
         self.output_size = self.vocab_size
 
-        if self.w_clip_vit:
+        if self.config.w_clip_vit:
             self.mm_projector = torch.nn.Sequential(
                 torch.nn.Linear(1024, 2048),
                 torch.nn.GELU(),
