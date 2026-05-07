@@ -140,7 +140,7 @@ class ShowoService:
             outputs = model.mmu_generate(
                 input_embeddings=input_embeddings,
                 attention_mask=attention_mask[0].unsqueeze(0),
-                max_new_tokens=100,
+                max_new_tokens=150,
                 top_k=1,
                 eot_token=tokenizer.eos_token_id
             )

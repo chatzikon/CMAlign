@@ -64,7 +64,9 @@ async def image_to_text(file: UploadFile):
 
     caption = showo.image_to_text(
         image,
-        question="Please describe this image in detail."
+        #question="Please describe this image in detail."
+        question="Describe key features in the image, not descriptive text, more like titles, and identify key features"
+                 " that may be interested in an investigation if this was a stolen image from someone's media files"
     )
 
     date_iso8601=datetime.datetime.now().isoformat()
