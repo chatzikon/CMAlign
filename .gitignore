@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# HuggingFace / Torch caches
+.cache/
+.huggingface/
+torch_cache/
+
+# W&B
+wandb/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+
+# Model checkpoints
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+models/Wan2.1_VAE.pth
+
+# Build artifacts
+dist/
+build/
+
+# Node
+node_modules/
+
+# Streamlit cache
+.streamlit/
+
+# Temporary
+tmp/
+temp/
+
