@@ -108,7 +108,6 @@ class ShowoService:
             eoi_tok,  # placeholder for image
             input_ids
         ], dim=1)
-
         # --- 5. Get embeddings ---
         with torch.no_grad():
             text_embeddings = model.showo.model.embed_tokens(input_ids_llava)
@@ -120,11 +119,14 @@ class ShowoService:
         part1 = text_embeddings[:, :2 + SYSTEM_PROMPT_LEN, :]
         part2 = text_embeddings[:, 2 + SYSTEM_PROMPT_LEN:, :]
 
+        print(part1.size())
+        print(part2.size())
+        print(image_embeddings.size())
+        #image_embeddings = image_embeddings.repeat(1, 1, 2)
         input_embeddings = torch.cat(
             (part1, image_embeddings, part2),
             dim=1
         )
-
         # --- 7. Create correct attention mask (CRITICAL) ---
 
         attention_mask = create_attention_mask_for_mmu_vit(
@@ -144,6 +146,8 @@ class ShowoService:
                 top_k=1,
                 eot_token=tokenizer.eos_token_id
             )
+
+
 
         # --- 9. Decode ---
         outputs = torch.stack(outputs).squeeze()[None]

@@ -33,8 +33,11 @@ RUN pip install -r requirements.txt
 COPY api ./api
 COPY models ./models
 
-COPY models/Showo /app/Show-o
-COPY models/Showo/configs /app/configs
+COPY models/Showo /app/Showo
+COPY models/Showo/show_o2/configs /app/configs
+COPY models/Wan2.1_VAE.pth /app/Wan2.1_VAE.pth
+
+COPY api/prompt.txt /app/api/prompt.txt
 
 EXPOSE 4523
 

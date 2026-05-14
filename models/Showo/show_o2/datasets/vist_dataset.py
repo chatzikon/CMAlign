@@ -20,7 +20,7 @@ import random
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
-from datasets.utils import image_transform, format_interleaved_sequence
+from models.Showo.show_o2.datasets.utils import image_transform, format_interleaved_sequence
 from torch.utils.data import Dataset
 from torchvision.datasets.folder import default_loader
 

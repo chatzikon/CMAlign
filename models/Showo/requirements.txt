@@ -200,7 +200,7 @@ tox==3.28.0
 tqdm==4.66.4
 traitlets==5.14.3
 transaction==4.0
-transformers==4.41.1
+transformers>=4.44.0
 translationstring==1.4
 triton==2.2.0
 typeguard==2.13.3

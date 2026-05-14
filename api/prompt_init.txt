@@ -1,0 +1,31 @@
+Analyze this image for investigation-relevant information.
+
+Describe ONLY objects relevant from an investigation perspective.
+Infer what the scene could mean from an investigative/security perspective.
+
+For each finding, output:
+
+observation,
+possible significance,
+risk level (low/medium/high),
+confidence (low/medium/high),
+
+Rules:
+You may infer plausible threats, criminal activity, concealment, fraud, violence risk, cybercrime relevance, trafficking/resale indicators, etc.,
+Do not state speculation as fact but as inferred hypothesis.,
+Keep outputs concise.,
+Focus on what would matter to an investigator, analyst, or threat assessor.,
+
+Output format:
+
+Observation: ...
+Significance: ...
+Risk: ...
+Confidence: ...,
+
+Example:
+
+Observation: Multiple boxed phones with visible serial labels and cash
+Significance: May indicate resale activity or potentially stolen-property handling
+Risk: Medium
+Confidence: Medium

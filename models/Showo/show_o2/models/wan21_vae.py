@@ -642,8 +642,14 @@ class WanVAE:
         self.scale = [self.mean, 1.0 / self.std]
 
         # init model
+
+        import os
+        cwd = os.getcwd()
+
+
+
         self.model = _video_vae(
-            pretrained_path=vae_pth,
+            pretrained_path=os.path.join(cwd,vae_pth),
             z_dim=z_dim,
         ).eval().requires_grad_(False).to(device)
 

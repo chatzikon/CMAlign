@@ -12,6 +12,7 @@ from typing import Any, List, Tuple, Union
 
 def get_config():
     return OmegaConf.load("/app/configs/showo_demo_w_clip_vit_512x512.yaml")
+    #return OmegaConf.load("show-o-512x512-wo-llava-tuning")
 
 
 def flatten_omega_conf(cfg: Any, resolve: bool = False) -> List[Tuple[str, Any]]:

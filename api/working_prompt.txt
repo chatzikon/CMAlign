@@ -1,0 +1,6 @@
+Analyze this image for investigation-relevant information.
+
+Describe ONLY objects relevant from an investigation perspective.
+Infer what the scene could mean from an investigative/security perspective.
+
+For each finding, show us the observation, the possible significance, the risk level (low/medium/high) and the confidence (low/medium/high).

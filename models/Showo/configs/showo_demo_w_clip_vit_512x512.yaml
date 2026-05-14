@@ -37,7 +37,8 @@ dataset:
         persistent_workers: True
 
     preprocessing:
-        max_seq_length: 128
+        #max_seq_length: 128
+        max_seq_length: 256
         resolution: 512
         center_crop: False
         random_flip: False

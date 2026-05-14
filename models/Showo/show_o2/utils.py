@@ -13,11 +13,8 @@ from decord import VideoReader, cpu
 #              config utils
 ##################################################
 def get_config():
-    cli_conf = OmegaConf.from_cli()
-    yaml_conf = OmegaConf.load(cli_conf.config)
-    conf = OmegaConf.merge(yaml_conf, cli_conf)
+    return OmegaConf.load("/app/configs/showo2_7b_demo_432x432.yaml")
 
-    return conf
 
 
 def flatten_omega_conf(cfg: Any, resolve: bool = False) -> List[Tuple[str, Any]]:
