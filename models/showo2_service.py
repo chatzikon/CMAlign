@@ -36,6 +36,9 @@ class Showo2Service:
 
         llm_path = self.config.model.showo.llm_model_path
 
+
+
+
         self.text_tokenizer, self.showo_token_ids = get_text_tokenizer(
             llm_path,
             add_showo_tokens=True,
@@ -113,6 +116,9 @@ class Showo2Service:
         top_k: int = 1,
     ) -> str:
         image_ori = image.convert("RGB")
+
+        print('question')
+        print(question)
 
         image_tensor = image_transform(
             image_ori,

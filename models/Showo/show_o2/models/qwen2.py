@@ -99,7 +99,8 @@ class Qwen2RotaryEmbedding(nn.Module):
         base=10000,
         device=None,
         scaling_factor=1.0,
-        rope_type="default",
+        rope_type="linear",
+        #rope_type="default",
         config: Optional[Qwen2Config] = None,
     ):
         super().__init__()
@@ -130,7 +131,35 @@ class Qwen2RotaryEmbedding(nn.Module):
             self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
+
+        self.rope_type="linear"
+        # if not hasattr(config, "rope_scaling") or config.rope_scaling is None:
+        #     config.rope_scaling = {"type": "linear", "factor": 1.0}
+
+        # print(ROPE_INIT_FUNCTIONS.keys())
+        # print(self.rope_type)
+
+        if not hasattr(self.config, "rope_parameters") or self.config.rope_parameters is None:
+            self.config.rope_parameters = {}
+
+        self.config.rope_parameters["rope_theta"] = getattr(self.config, "rope_theta", 1000000.0)
+        self.config.rope_parameters["rope_type"] = "linear"
+        self.config.rope_parameters["factor"] = 1.0
+
+        # self.config.rope_theta = self.config.rope_parameters["rope_theta"]
+        self.config.rope_scaling = {
+            "type": "linear",
+            "factor": 1.0,
+        }
+        #
+        # print(self.config)
+
         self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.config.rope_parameters["rope_type"] = "linear"
+        self.config.rope_parameters["factor"] = 1.0
+
+
+
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device, **self.rope_kwargs)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
@@ -265,7 +294,8 @@ class Qwen2Attention(nn.Module):
         self.num_key_value_heads = config.num_key_value_heads
         self.num_key_value_groups = self.num_heads // self.num_key_value_heads
         self.max_position_embeddings = config.max_position_embeddings
-        self.rope_theta = config.rope_theta
+        #self.rope_theta = config.rope_theta
+        self.rope_theta = getattr(config, "rope_theta", 1000000.0)
         self.is_causal = True
         self.attention_dropout = config.attention_dropout
 

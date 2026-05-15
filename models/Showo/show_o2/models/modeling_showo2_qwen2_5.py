@@ -52,11 +52,16 @@ class Showo2Qwen2_5(ModelMixin, ConfigMixin):
     ):
         super().__init__()
 
+
+
+
         llm_config = AutoConfig.from_pretrained(llm_model_path)
         if load_from_showo:
-            self.showo = Qwen2ForCausalLM(llm_config)
+              self.showo = Qwen2ForCausalLM(llm_config)
         else:
             self.showo = Qwen2ForCausalLM.from_pretrained(llm_model_path, attn_implementation='sdpa')
+
+
         self.showo.resize_token_embeddings(llm_vocab_size)
 
         # patch embedding layer for semantic layers

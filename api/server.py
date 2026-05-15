@@ -6,8 +6,6 @@ import io
 import os
 
 
-from models.image_to_text import  img_to_txt
-
 import datetime
 from contextlib import asynccontextmanager
 

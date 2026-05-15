@@ -1,24 +1,23 @@
-Analyze the image for investigation-relevant visual indicators.
+Describe the image as a scene report.
 
-Focus on:
-- unusual operational setups
-- bulk item handling
-- concealment
-- security-relevant artifacts
-- forensic relevance
-- logistics patterns
-- anomalous activity
+Rules:
 
-Describe only visually grounded observations.
+* Use short factual statements
+* Do NOT explain emotions or intentions
+* Do NOT speculate
+* Do NOT repeat information
+* Mention only visible details useful for scene understanding
 
-Return JSON only.
+Output format:
 
-[
-  {
-    "observation": "...",
-    "investigative_relevance": "...",
-    "possible_interpretation": "...",
-    "priority": "benign|notable|significant",
-    "confidence": "low|medium|high"
-  }
-]
+Items:
+
+1. <visible detail> — <short contextual relevance>
+2. <visible detail> — <short contextual relevance>
+3. <visible detail> — <short contextual relevance>
+
+Conclusion:
+Observation: <short overall scene summary>
+Significance: <short contextual relevance>
+Risk: Low/Medium/High
+Confidence: Low/Medium/High
