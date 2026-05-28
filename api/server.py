@@ -62,11 +62,15 @@ async def image_to_text(file: UploadFile):
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes))
 
+    prompt_file = "/app/api/prompt.txt"
+
+    with open(prompt_file, "r", encoding="utf-8") as f:
+        prompt = f.read()
+
     caption = showo.image_to_text(
         image,
         #question="Please describe this image in detail."
-        question="Describe key features in the image, not descriptive text, more like titles, and identify key features"
-                 " that may be interested in an investigation if this was a stolen image from someone's media files"
+        question=prompt
     )
 
     date_iso8601=datetime.datetime.now().isoformat()

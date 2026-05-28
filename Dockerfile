@@ -36,6 +36,8 @@ COPY models ./models
 COPY models/Showo /app/Show-o
 COPY models/Showo/configs /app/configs
 
+COPY api/prompt.txt /app/api/prompt.txt
+
 EXPOSE 4523
 
 CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "4523"]
