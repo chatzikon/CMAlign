@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile,  Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+#from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from PIL import Image
 import io
@@ -26,30 +26,34 @@ showo = ShowoService(config)
 
 app = FastAPI(title="Multimodal Image API")
 
-# Use an environment variable in practice
-API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN", "my-secret-token")
-
-security = HTTPBearer()
-
-def verify_bearer_token(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> str:
-    token = credentials.credentials
-
-    if token != API_BEARER_TOKEN:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or missing bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return token
+# # Use an environment variable in practice
+# API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN", "my-secret-token")
+#
+# security = HTTPBearer()
+#
+# def verify_bearer_token(
+#     credentials: HTTPAuthorizationCredentials = Depends(security),
+# ) -> str:
+#     token = credentials.credentials
+#
+#     if token != API_BEARER_TOKEN:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Invalid or missing bearer token",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#
+#     return token
 
 # ---- Routes ----
 
+# @app.get("/")
+# async def root(token: str = Depends(verify_bearer_token)):
+#     return {"message": "API is running and authenticated"}
+
+
 @app.get("/")
-async def root(token: str = Depends(verify_bearer_token)):
-    return {"message": "API is running and authenticated"}
+async def root():
 
 
 # ---- Request model ----
