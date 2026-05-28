@@ -54,6 +54,7 @@ app = FastAPI(title="Multimodal Image API")
 
 @app.get("/")
 async def root():
+    return {"message": "API is running"}
 
 
 # ---- Request model ----
