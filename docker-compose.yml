@@ -3,7 +3,7 @@ services:
     build: .
     container_name: multimodal-api
     ports:
-      - "4523:4523"
+      - "8000:8000"
     deploy:
       resources:
         reservations:

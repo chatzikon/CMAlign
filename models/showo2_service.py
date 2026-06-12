@@ -37,8 +37,6 @@ class Showo2Service:
         llm_path = self.config.model.showo.llm_model_path
 
 
-
-
         self.text_tokenizer, self.showo_token_ids = get_text_tokenizer(
             llm_path,
             add_showo_tokens=True,
@@ -48,15 +46,21 @@ class Showo2Service:
 
         self.config.model.showo.llm_vocab_size = len(self.text_tokenizer)
 
+        print('load showo', self.config.model.showo.load_from_showo)
+
+
         if self.config.model.showo.load_from_showo:
             self.model = Showo2Qwen2_5.from_pretrained(
                 self.config.model.showo.pretrained_model_path,
                 use_safetensors=False,
+                load_from_showo=True
             ).to(self.device)
         else:
             self.model = Showo2Qwen2_5(**self.config.model.showo).to(self.device)
             state_dict = load_state_dict(self.config.model_path)
             self.model.load_state_dict(state_dict)
+
+        print('ksefygam')
 
         self.model.to(self.weight_type)
         self.model.eval()

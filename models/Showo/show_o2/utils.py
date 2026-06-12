@@ -16,7 +16,6 @@ def get_config():
     return OmegaConf.load("/app/configs/showo2_1.5b_demo_432x432.yaml")
 
 
-
 def flatten_omega_conf(cfg: Any, resolve: bool = False) -> List[Tuple[str, Any]]:
     ret = []
 

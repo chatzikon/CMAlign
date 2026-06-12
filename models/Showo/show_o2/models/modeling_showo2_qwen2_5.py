@@ -35,7 +35,7 @@ class Showo2Qwen2_5(ModelMixin, ConfigMixin):
             self,
             llm_vocab_size=None,
             llm_model_path='',
-            load_from_showo=False,
+            load_from_showo=True,
             image_latent_dim=16,
             image_latent_height=16,
             image_latent_width=16,
@@ -54,12 +54,16 @@ class Showo2Qwen2_5(ModelMixin, ConfigMixin):
 
 
 
-
+        print('load showo', load_from_showo)
         llm_config = AutoConfig.from_pretrained(llm_model_path)
         if load_from_showo:
               self.showo = Qwen2ForCausalLM(llm_config)
         else:
-            self.showo = Qwen2ForCausalLM.from_pretrained(llm_model_path, attn_implementation='sdpa')
+            self.showo, info = Qwen2ForCausalLM.from_pretrained(llm_model_path, attn_implementation='sdpa', output_loading_info=True,)
+
+            self.showo.tie_weights()
+
+
 
 
         self.showo.resize_token_embeddings(llm_vocab_size)

@@ -16,6 +16,8 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+ENV PYTHONUNBUFFERED=1
+
 ## 3️⃣ Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
 
@@ -39,6 +41,6 @@ COPY models/Wan2.1_VAE.pth /app/Wan2.1_VAE.pth
 
 COPY api/prompt.txt /app/api/prompt.txt
 
-EXPOSE 4523
+EXPOSE 8000
 
-CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "4523"]
+CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]
