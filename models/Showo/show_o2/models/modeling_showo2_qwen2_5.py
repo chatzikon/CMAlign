@@ -527,15 +527,30 @@ class Showo2Qwen2_5(ModelMixin, ConfigMixin):
             self,
             input_embeds=None,
             attention_mask=None,
+
+
+
             max_new_tokens=100,
             temperature=1.0,
             top_k=None,
+
             eos_token=None):
         """
         Take a conditioning sequence of indices idx (LongTensor of shape (b,t)) and complete
         the sequence max_new_tokens times, feeding the predictions back into the model each time.
         Most likely you'll want to make sure to be in model.eval() mode of operation for this.
         """
+        # top_k=1
+        # temperature=0.3
+        #
+        # max_new_tokens=512
+
+        print('arguments')
+        print(top_k)
+        print(max_new_tokens)
+        print(temperature)
+
+
         device = input_embeds.device
         dtype = input_embeds.dtype
         result = []

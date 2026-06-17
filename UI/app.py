@@ -3,7 +3,7 @@ import requests
 from PIL import Image
 import io
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8001"
 
 app_icon = Image.open("UI/ensemble_logo.png")
 

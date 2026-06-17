@@ -1,9 +1,10 @@
 services:
   api:
     build: .
-    container_name: multimodal-api
+    image: cmalign-api:v2
+    container_name: multimodal-api2
     ports:
-      - "8000:8000"
+      - "8001:8001"
     deploy:
       resources:
         reservations:

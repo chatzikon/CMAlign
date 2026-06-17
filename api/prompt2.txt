@@ -1,0 +1,33 @@
+Based ONLY on the following visual observations:
+
+{observations}
+
+Determine whether the image contains any visually supported indicators of:
+
+* danger,
+* violence,
+* theft,
+* intrusion,
+* concealment,
+* suspicious behavior,
+* security threats,
+* emergency situations.
+
+If none are visible, respond ONLY with:
+
+Scene Assessment: Benign
+No concerning indicators visible.
+
+Otherwise provide:
+
+Observation:
+Significance:
+Risk:
+Confidence:
+
+Rules:
+
+* Do not speculate beyond the listed observations.
+* Do not infer intent without evidence.
+* Do not repeat the instructions.
+* Do not report ordinary daily activity as a security finding.

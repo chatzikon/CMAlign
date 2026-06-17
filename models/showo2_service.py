@@ -8,7 +8,7 @@ from omegaconf import OmegaConf
 
 # Adapt these import paths to where you copied Show-o2 in your project.
 # If your Show-o2 folder is under models/Showo/show-o2, you may need to expose it via PYTHONPATH.
-from models.Showo.show_o2.models import Showo2Qwen2_5, WanVAE, omni_attn_mask_naive
+from models.Showo.show_o2.models import Showo2Qwen2_5, WanVAE, omni_attn_mask_naive, Qwen2ForCausalLM
 from models.Showo.show_o2.models.misc import get_text_tokenizer
 from models.Showo.show_o2.utils import get_hyper_params, path_to_llm_name, load_state_dict
 from models.Showo.show_o2.datasets.utils import image_transform
@@ -49,20 +49,81 @@ class Showo2Service:
         print('load showo', self.config.model.showo.load_from_showo)
 
 
+
         if self.config.model.showo.load_from_showo:
             self.model = Showo2Qwen2_5.from_pretrained(
                 self.config.model.showo.pretrained_model_path,
+                load_from_showo=True,
                 use_safetensors=False,
-                load_from_showo=True
+                #torch_dtype=torch.float16,
             ).to(self.device)
         else:
-            self.model = Showo2Qwen2_5(**self.config.model.showo).to(self.device)
-            state_dict = load_state_dict(self.config.model_path)
-            self.model.load_state_dict(state_dict)
+            self.model = (Showo2Qwen2_5(llm_model_path="Qwen/Qwen2.5-1.5B-Instruct",
+                                       clip_pretrained_model_path="google/siglip-so400m-patch14-384",
+                                       load_from_showo=False, image_latent_height=27,image_latent_width=27,hidden_size=1536)
+                          .to(self.device))
+            # self.model = Showo2Qwen2_5(**self.config.model.showo).to(self.device)
+            # state_dict = load_state_dict(self.config.model_path)
+            # self.model.load_state_dict(state_dict)
 
-        print('ksefygam')
+        # load HF Qwen
+        # hf_qwen = Qwen2ForCausalLM.from_pretrained("Qwen/Qwen2.5-1.5B-Instruct",
+        #                                             attn_implementation='sdpa',
+        #                                            #torch_dtype=torch.float16,
+        #                                            device_map="cpu")
+        #
+        # # replace only matching Qwen weights
+        # target_sd = self.model.showo.state_dict()
+        # hf_sd = hf_qwen.state_dict()
+        #
+        # filtered_hf_sd = {
+        #     k: v
+        #     for k, v in hf_sd.items()
+        #     if k in target_sd
+        #        and v.shape == target_sd[k].shape
+        #        and not k.startswith("model.embed_tokens")
+        #        and not k.startswith("lm_head")
+        # }
+        #
+        # self.model.showo.load_state_dict(filtered_hf_sd, strict=False)
+        #
+        # del hf_qwen
+        # del hf_sd
+        # del filtered_hf_sd
+        #
+        # import gc
+        # gc.collect()
+        #
+        # torch.cuda.empty_cache()
 
-        self.model.to(self.weight_type)
+        ##load siglip
+        # from transformers import SiglipModel
+        #
+        # hf_siglip = SiglipModel.from_pretrained(
+        #     "google/siglip-so400m-patch14-384",
+        #     torch_dtype=torch.float16,
+        #     device_map="cpu",
+        # )
+        #
+        # # position embedding
+        # self.model.position_embedding.load_state_dict(
+        #     hf_siglip.vision_model.embeddings.position_embedding.state_dict()
+        # )
+        #
+        # # encoder, omitting the removed final layer automatically
+        # target_sd = self.model.und_trans.state_dict()
+        # hf_sd = hf_siglip.vision_model.encoder.state_dict()
+        #
+        # filtered_sd = {
+        #     k: v
+        #     for k, v in hf_sd.items()
+        #     if k in target_sd and v.shape == target_sd[k].shape
+        # }
+        #
+        # self.model.und_trans.load_state_dict(filtered_sd, strict=False)
+
+
+        #self.model.to(self.weight_type)
         self.model.eval()
 
         if self.config.model.showo.add_time_embeds:
@@ -117,6 +178,7 @@ class Showo2Service:
         image: Image.Image,
         question: str = "Please describe this image in detail.",
         max_new_tokens: int = 300,
+        temperature: float = 1.0,
         top_k: int = 1,
     ) -> str:
         image_ori = image.convert("RGB")
@@ -124,19 +186,25 @@ class Showo2Service:
         print('question')
         print(question)
 
+        model_dtype = next(self.model.parameters()).dtype
+
         image_tensor = image_transform(
             image_ori,
             resolution=self.config.dataset.preprocessing.resolution,
-        ).to(self.device)
+        ).to(device=self.device, dtype=model_dtype)
 
         image_tensor = image_tensor.unsqueeze(0)
 
         image_latents = self.vae_model.sample(
             image_tensor.unsqueeze(2)
-        ).squeeze(2).to(self.weight_type)
+        ).squeeze(2).to(device=self.device, dtype=model_dtype)
 
         image_embeds_und = self.model.image_embedder_und(image_latents)
         image_embeds_gen = self.model.image_embedder_gen(image_latents)
+
+        print(image_embeds_und.size())
+        print(self.model.position_embedding(self.model.image_position_ids).size())
+
 
         image_embeds_und = image_embeds_und + self.model.position_embedding(
             self.model.image_position_ids
@@ -174,12 +242,20 @@ class Showo2Service:
 
         if self.config.model.showo.add_time_embeds:
             time_embeds = self.model.time_embed(
-                torch.tensor([[1.0]], device=self.device),
+                torch.tensor([[1.0]], device=self.device, dtype=model_dtype),
                 text_embeds_a.dtype,
             )
 
             if hasattr(self.model, "time_embed_proj"):
                 time_embeds = self.model.time_embed_proj(time_embeds)
+
+
+            print('size2')
+
+            print(text_embeds_a.size())
+            print(text_embeds_b.size())
+            print(time_embeds.size())
+            print(image_embeds.size())
 
             input_embeds = torch.cat(
                 [
@@ -190,7 +266,7 @@ class Showo2Service:
                     text_embeds_b[:, 1:],
                 ],
                 dim=1,
-            ).to(self.weight_type)
+            ).to(dtype=model_dtype)
 
             modality_positions = torch.tensor(
                 [text_tokens_a.shape[1] + 2, self.num_mmu_image_tokens],
@@ -220,11 +296,14 @@ class Showo2Service:
             inverted=True,
         ).to(input_embeds.dtype)
 
+
+
         output_tokens = self.model.mmu_generate(
             input_embeds=input_embeds,
             attention_mask=attention_mask,
             top_k=top_k,
             max_new_tokens=max_new_tokens,
+            temperature=temperature,
             eos_token=self.text_tokenizer.eos_token_id,
         )
 

@@ -1,0 +1,18 @@
+Analyze this image for investigation-relevant information.
+
+Only report visually grounded findings. Do not identify people, do not infer private identity, and do not invent events not visible in the image.
+
+For each finding, provide:
+Observation:
+Possible investigative/security significance:
+Risk level: low / medium / high
+Confidence: low / medium / high
+
+Focus on:
+- unusual objects
+- weapons or weapon-like objects
+- damage, smoke, fire, blood-like stains, forced entry signs
+- unattended bags/packages
+- vehicles, license plates if visible
+- crowd behavior, falling, fighting, theft-like behavior
+- safety hazards

@@ -1,0 +1,50 @@
+Describe the image using only directly visible details.
+
+Include ALL notable visible elements, including:
+
+* people,
+* clothing,
+* carried items,
+* objects,
+* vehicles,
+* environment,
+* background details,
+* actions,
+* spatial relationships,
+* unusual or notable visible details.
+
+Focus on comprehensive scene description rather than interpretation.
+
+Do not infer:
+
+* intent,
+* danger,
+* criminal activity,
+* hidden events,
+* relationships between people.
+
+Do not provide:
+
+* security analysis,
+* risk assessment,
+* speculation,
+* emotional interpretation unless visually obvious.
+
+If visible, explicitly mention:
+
+* entrances/exits,
+* bags/backpacks,
+* electronic devices,
+* damaged objects,
+* barriers/fences,
+* crowds,
+* vehicles,
+* emergency indicators,
+* surveillance-related elements.
+
+Output requirements:
+
+* Use concise bullet points.
+* Describe only observable facts.
+* Avoid repetition.
+* Provide at least 5 observations if possible.

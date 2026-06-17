@@ -39,8 +39,8 @@ COPY models/Showo /app/Showo
 COPY models/Showo/show_o2/configs /app/configs
 COPY models/Wan2.1_VAE.pth /app/Wan2.1_VAE.pth
 
-COPY api/prompt.txt /app/api/prompt.txt
+COPY api/prompt1.txt /app/api/prompt.txt
 
-EXPOSE 8000
+EXPOSE 8001
 
-CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8001"]

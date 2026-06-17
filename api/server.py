@@ -60,14 +60,18 @@ async def image_to_text(file: UploadFile):
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes))
 
-    prompt_file = "/app/api/prompt.txt"
+    prompt_file1 = "/app/api/prompt1.txt"
+    prompt_file2 = "/app/api/prompt2.txt"
 
-    with open(prompt_file, "r", encoding="utf-8") as f:
-        prompt = f.read()
+    with open(prompt_file1, "r", encoding="utf-8") as f:
+        prompt1 = f.read()
 
-    caption = showo.image_to_text(
+    with open(prompt_file2, "r", encoding="utf-8") as f:
+        prompt2 = f.read()
+
+    caption1 = showo.image_to_text(
         image,
-        question=prompt,
+        question=prompt1,
         #question="Please describe this image in detail."
         # question="Analyze this image for investigation-relevant information. "
         #
@@ -100,7 +104,22 @@ async def image_to_text(file: UploadFile):
         #          "Observation: Multiple boxed phones with visible serial labels and cash"
         #          "Significance: May indicate resale activity or potentially stolen-property handling"
         #          "Risk: Medium"
-        #          "Confidence: Medium"
+        #          "Confidence: Medium",
+        max_new_tokens=224,
+        temperature=0.1,
+        top_k=1,
+    )
+
+    stage_2_prompt = prompt2.format(
+        observations=caption1
+    )
+
+    final_analysis = showo.image_to_text(
+        image,
+        question=stage_2_prompt,
+        max_new_tokens=128,
+        temperature=0.1,
+        top_k=1,
     )
 
     date_iso8601=datetime.datetime.now().isoformat()
@@ -108,11 +127,14 @@ async def image_to_text(file: UploadFile):
 
     return {
         "tool_name": "CMAlign",
-        "text": {"caption": caption},
+        "text": {
+            "visual_observations": caption1,
+            "caption": final_analysis,
+        },
         "in_id": 'afr55',
         "in_filename": file.filename,
         "image": True,
         "store_misp": False,
-        "description": {"frame_start": 1, "frame_end": 1, "text": caption},
+        "description": {"frame_start": 1, "frame_end": 1, "text": final_analysis},
         "date_iso8601": date_iso8601
     }
