@@ -1,50 +1,37 @@
-Describe the image using only directly visible details.
+Analyze this image from an investigation and security perspective.
 
-Include ALL notable visible elements, including:
+Provide a concise analytical assessment of the scene.
 
-* people,
-* clothing,
-* carried items,
-* objects,
-* vehicles,
-* environment,
-* background details,
-* actions,
-* spatial relationships,
-* unusual or notable visible details.
+Focus on:
 
-Focus on comprehensive scene description rather than interpretation.
+* visible behavior or movement,
+* environmental context,
+* suspicious or unattended objects,
+* possible safety concerns,
+* operationally relevant details,
+* indicators of residential, commercial, or public setting.
 
-Do not infer:
+Do not invent crimes, threats, or intent that are not visually supported.
 
-* intent,
-* danger,
-* criminal activity,
-* hidden events,
-* relationships between people.
+If the scene appears benign, explain briefly why it appears benign instead of forcing suspicious findings.
 
-Do not provide:
+Avoid:
 
-* security analysis,
-* risk assessment,
-* speculation,
-* emotional interpretation unless visually obvious.
+* emotional interpretation,
+* aesthetic description,
+* repetitive statements,
+* unnecessary discussion of decoration or clothing unless operationally relevant.
 
-If visible, explicitly mention:
+Guidelines:
 
-* entrances/exits,
-* bags/backpacks,
-* electronic devices,
-* damaged objects,
-* barriers/fences,
-* crowds,
-* vehicles,
-* emergency indicators,
-* surveillance-related elements.
+* Prefer 3–6 concise points.
+* Mention uncertainty when evidence is weak.
+* Distinguish visible observations from cautious interpretation.
+* Keep the tone analytical and professional.
 
-Output requirements:
+Example style:
 
-* Use concise bullet points.
-* Describe only observable facts.
-* Avoid repetition.
-* Provide at least 5 observations if possible.
+1. The scene appears to be a residential outdoor area with two individuals moving down exterior steps.
+2. The visible behavior appears ordinary, although rapid movement on the stairs may present a minor safety risk.
+3. No suspicious objects, visible weapons, forced-entry indicators, or unattended items are present.
+4. Overall, the scene appears benign and consistent with normal residential activity.

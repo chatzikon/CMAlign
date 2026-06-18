@@ -69,7 +69,7 @@ async def image_to_text(file: UploadFile):
     with open(prompt_file2, "r", encoding="utf-8") as f:
         prompt2 = f.read()
 
-    caption1 = showo.image_to_text(
+    final_analysis= showo.image_to_text(
         image,
         question=prompt1,
         #question="Please describe this image in detail."
@@ -105,22 +105,22 @@ async def image_to_text(file: UploadFile):
         #          "Significance: May indicate resale activity or potentially stolen-property handling"
         #          "Risk: Medium"
         #          "Confidence: Medium",
-        max_new_tokens=224,
-        temperature=0.1,
-        top_k=1,
+        max_new_tokens=384,
+        temperature=0.3,
+        top_k=5,
     )
 
-    stage_2_prompt = prompt2.format(
-        observations=caption1
-    )
-
-    final_analysis = showo.image_to_text(
-        image,
-        question=stage_2_prompt,
-        max_new_tokens=128,
-        temperature=0.1,
-        top_k=1,
-    )
+    # stage_2_prompt = prompt2.format(
+    #     observations=caption1
+    # )
+    #
+    # final_analysis = showo.image_to_text(
+    #     image,
+    #     question=stage_2_prompt,
+    #     max_new_tokens=128,
+    #     temperature=0.1,
+    #     top_k=1,
+    # )
 
     date_iso8601=datetime.datetime.now().isoformat()
 
@@ -128,7 +128,7 @@ async def image_to_text(file: UploadFile):
     return {
         "tool_name": "CMAlign",
         "text": {
-            "visual_observations": caption1,
+            #"visual_observations": caption1,
             "caption": final_analysis,
         },
         "in_id": 'afr55',
