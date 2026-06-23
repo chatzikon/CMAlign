@@ -18,7 +18,7 @@ from typing import Any, Callable
 
 import torch
 from torchvision.datasets.folder import default_loader
-from models.Showo.show_o2.datasets.utils import image_transform, resize_and_pad_image, to_tensor_and_normalize
+from datasets.utils import image_transform, resize_and_pad_image, to_tensor_and_normalize
 import os
 import json
 import torch.utils.data as data

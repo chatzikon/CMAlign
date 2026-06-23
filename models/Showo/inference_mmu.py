@@ -80,6 +80,8 @@ if __name__ == '__main__':
     temperature = 0.8  # 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
     top_k = 1  # retain only the top_k most likely tokens, clamp others to have 0 probability
 
+
+    print(os.listdir(config.mmu_image_root))
     file_list = os.listdir(config.mmu_image_root)
     responses = ['' for i in range(len(file_list))]
     images = []

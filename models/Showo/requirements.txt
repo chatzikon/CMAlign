@@ -135,7 +135,7 @@ pyasn1==0.6.0
 pycocotools==2.0.7
 pycparser==2.22
 pycryptodomex==3.20.0
-#pycurl==7.43.0.6
+pycurl==7.43.0.6
 pydantic==1.10.15
 pydantic_core==2.18.3
 Pygments==2.18.0
@@ -200,7 +200,7 @@ tox==3.28.0
 tqdm==4.66.4
 traitlets==5.14.3
 transaction==4.0
-transformers>=4.44.0
+transformers==4.41.1
 translationstring==1.4
 triton==2.2.0
 typeguard==2.13.3

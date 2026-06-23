@@ -657,7 +657,7 @@ class WanVAE:
         with amp.autocast(dtype=self.dtype):
             return self.model.decode(zs, self.scale).float().clamp_(-1, 1)
 
-    def sample(self, videos, deterministic=False, return_features=False):
+    def sample(self, videos, deterministic=False, return_features=True):
         with amp.autocast(dtype=self.dtype):
             if return_features:
                 out, feats = self.model.sample(videos, self.scale, deterministic=deterministic,

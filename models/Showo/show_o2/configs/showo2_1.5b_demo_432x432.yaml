@@ -1,3 +1,6 @@
+mmu_image_path: './docs/mmu'
+question: 'Describe the image in detail'
+
 wandb:
   entity: null
 #  run_id: blvqij6q

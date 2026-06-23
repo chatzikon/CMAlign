@@ -1,3 +1,6 @@
+mmu_image_root: './'
+question: 'Describe the image in detail.'
+
 wandb:
   entity: null
 #  run_id: askkz9i2

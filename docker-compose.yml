@@ -10,8 +10,6 @@ services:
         reservations:
           devices:
             - capabilities: [ gpu ]
-    volumes:
-      - /home/chatziko/PycharmProjects/PythonProject/Multimodal-VAE/results:/app/checkpoints
     environment:
       - API_BEARER_TOKEN=my-secret-token
       - HF_TOKEN=hf_FdIZNKPcBrzuHeWgDJedQvdHemMaiNeXwYHF_TOKEN=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

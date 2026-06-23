@@ -11,9 +11,12 @@ from typing import Any, List, Tuple, Union
 ##################################################
 
 def get_config():
-    return OmegaConf.load("/app/configs/showo_demo_w_clip_vit_512x512.yaml")
+    return OmegaConf.load("./configs/showo_demo_w_clip_vit_512x512.yaml")
+    #return OmegaConf.load("/app/configs/showo_demo_w_clip_vit_512x512.yaml")
     #return OmegaConf.load("show-o-512x512-wo-llava-tuning")
 
+'/home/chatziko/PycharmProjects/PythonProject/showo2_cmalign/CMAlign/models/Showo/show_o2/configs/showo_demo_w_clip_vit_512x512.yaml'
+'/home/chatziko/PycharmProjects/PythonProject/showo2_cmalign/CMAlign/models/Showo/show_o2/configs/showo2_1.5b_demo_512x512.yaml'
 
 def flatten_omega_conf(cfg: Any, resolve: bool = False) -> List[Tuple[str, Any]]:
     ret = []

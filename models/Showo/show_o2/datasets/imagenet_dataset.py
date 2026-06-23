@@ -25,7 +25,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.distributed import DistributedSampler
 
-from models.Showo.show_o2.datasets.utils import (
+from datasets.utils import (
     image_transform, remove_prefix, format_sequence_und, format_sequence_gen_qwen2_5
 )
 from torchvision.datasets.folder import DatasetFolder, default_loader
