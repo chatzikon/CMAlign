@@ -1,33 +1,19 @@
-Based ONLY on the following visual observations:
+Analyze this image as an investigation-support assistant.
 
-{observations}
+Report only visually grounded findings that could matter to an investigator, security analyst, or threat assessor.
 
-Determine whether the image contains any visually supported indicators of:
+Do not identify people. Do not infer guilt, intent, private identity, or emotions unless directly supported by visible evidence. Do not invent threats. If the image appears benign, say that no clear investigation-relevant risk is visible.
 
-* danger,
-* violence,
-* theft,
-* intrusion,
-* concealment,
-* suspicious behavior,
-* security threats,
-* emergency situations.
+For each relevant finding, use exactly this format:
 
-If none are visible, respond ONLY with:
-
-Scene Assessment: Benign
-No concerning indicators visible.
-
-Otherwise provide:
-
-Observation:
-Significance:
-Risk:
-Confidence:
+Observation: [specific visible evidence only]
+Significance: [possible investigation/security relevance, stated cautiously]
+Risk: [Low / Medium / High]
+Confidence: [Low / Medium / High]
 
 Rules:
-
-* Do not speculate beyond the listed observations.
-* Do not infer intent without evidence.
-* Do not repeat the instructions.
-* Do not report ordinary daily activity as a security finding.
+- Prefer 1–5 findings.
+- Do not repeat findings.
+- Do not describe decoration, clothing color, or general scene details unless operationally relevant.
+- Mention uncertainty explicitly when evidence is weak.
+- If no meaningful finding is visible, output one low-risk finding explaining that.
