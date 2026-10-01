@@ -25,111 +25,11 @@ from models.misc import get_text_tokenizer, prepare_gen_input
 from utils import get_config, flatten_omega_conf, denorm, get_hyper_params, path_to_llm_name, load_state_dict, set_seed
 from torch.nn.attention.flex_attention import flex_attention, create_block_mask
 from datasets.utils import image_transform, resize_and_pad_image, to_tensor_and_normalize
-
 # set_seed(10)
-
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
-
-from matplotlib.patches import ConnectionPatch
-
-
-def tsne_calc(z_images,z_texts):
-    tsne = TSNE(n_components=4, perplexity=2, max_iter=1000, random_state=42, method="exact")
-
-    #X1=z_images
-
-    # print(X1.shape)
-    # print("NaN:", np.isnan(X1).any())
-    # print("Inf:", np.isinf(X1).any())
-    # print("global std:", np.std(X1))
-    # print("per-feature zero std:", np.sum(np.std(X1, axis=0) == 0))
-    # print("unique rows:", np.unique(X1, axis=0).shape[0])
-    #
-    # X2=z_texts
-    # print(X2.shape)
-    # print("NaN:", np.isnan(X2).any())
-    # print("Inf:", np.isinf(X2).any())
-    # print("global std:", np.std(X2))
-    # print("per-feature zero std:", np.sum(np.std(X2, axis=0) == 0))
-    # print("unique rows:", np.unique(X2, axis=0).shape[0])
-
-    print('img')
-    z_img_tsne = tsne.fit_transform(z_images)
-    print('txt')
-    z_txt_tsne = tsne.fit_transform(z_texts)
-
-
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6), gridspec_kw={'wspace': 0.3})
-
-
-
-    ax1.scatter(
-        z_img_tsne[:, 0],
-        z_img_tsne[:, 1],
-        # c=colors[label],
-        #label=f'Image ({label})',
-        alpha=0.7,
-        s=80
-    )
-
-    ax1.set_title('Image Embeddings', fontsize=16)
-    ax1.set_xlabel('t-SNE 1', fontsize=14)
-    ax1.set_ylabel('t-SNE 2', fontsize=14)
-    ax1.legend(fontsize=12)
-    ax1.tick_params(axis='both', labelsize=12)
-    ax1.grid(True, alpha=0.3)
-
-    ax2.scatter(
-        z_txt_tsne[:, 0],
-        z_txt_tsne[:, 1],
-        # c=colors[label],
-        # label=f'Text ({label})',
-        alpha=0.7,
-        s=80
-    )
-
-    ax2.set_title('Text Embeddings', fontsize=16)
-    ax2.set_xlabel('t-SNE 1', fontsize=14)
-    ax2.set_ylabel('t-SNE 2', fontsize=14)
-    ax2.legend(fontsize=12)
-    ax2.tick_params(axis='both', labelsize=12)
-    ax2.grid(True, alpha=0.3)
-
-    num_lines = min(30, 12)
-
-
-    for i in range(num_lines):
-        con = ConnectionPatch(
-            xyA=(z_img_tsne[i, 0], z_img_tsne[i, 1]),
-            xyB=(z_txt_tsne[i, 0], z_txt_tsne[i, 1]),
-            coordsA="data",
-            coordsB="data",
-            axesA=ax1,
-            axesB=ax2,
-            alpha=0.4,
-            linestyle="--",
-            linewidth=0.8
-        )
-        fig.add_artist(con)
-
-    plt.suptitle('Cross-Modal Latent Space Alignment', fontsize=18, y=1.02)
-    save_dir='./'
-    plt.savefig(
-        os.path.join(save_dir, 'paired_tsne_2d_gender_colored_lines.png'),
-        dpi=300,
-        bbox_inches='tight',
-        pad_inches=0.5
-    )
-    plt.close()
-
 
 logger = get_logger(__name__, log_level="INFO")
 
 if __name__ == '__main__':
-
-
 
     config = get_config()
 
@@ -165,10 +65,9 @@ if __name__ == '__main__':
                                                          llm_name=path_to_llm_name[config.model.showo.llm_model_path])
     config.model.showo.llm_vocab_size = len(text_tokenizer)
 
-    print(config.model.showo.load_from_showo)
-
     if config.model.showo.load_from_showo:
-        model = Showo2Qwen2_5.from_pretrained(config.model.showo.pretrained_model_path, use_safetensors=False).to(device)
+        model = Showo2Qwen2_5.from_pretrained(config.model.showo.pretrained_model_path, torch_dtype=torch.bfloat16,
+    low_cpu_mem_usage=True,  use_safetensors=False).to(device)
     else:
         model = Showo2Qwen2_5(**config.model.showo).to(device)
         state_dict = load_state_dict(config.model_path)
@@ -196,18 +95,18 @@ if __name__ == '__main__':
     else:
         file_list = [config.mmu_image_path]
 
-    config.question = config.question.split(' *** ')
+    #config.question = config.question.split(' *** ')
+    with open(config.prompt_file, "r", encoding="utf-8") as f:
+        config.question = [f.read().strip()]
+
+
 
     sys_prompt_ids = text_tokenizer("system\nYou are a helpful assistant.<|im_end|>",
                                     add_special_tokens=False)['input_ids']
     role_a = text_tokenizer("\n<|im_start|>user\n", add_special_tokens=False)['input_ids']
     role_b = text_tokenizer("\n<|im_start|>assistant\n", add_special_tokens=False)['input_ids']
 
-    z_images=[]
-    z_texts=[]
-
     for step, image_path in enumerate(tqdm(file_list)):
-        print(image_path)
         image_ori = Image.open(image_path).convert("RGB")
         # not center cropping
         # image = resize_and_pad_image(image, target_resolution=(config.dataset.preprocessing.resolution,
@@ -217,27 +116,31 @@ if __name__ == '__main__':
         image = image_transform(image_ori, resolution=config.dataset.preprocessing.resolution).to(device)
         image = image.unsqueeze(0)
 
-        #image_latents, features = vae_model.sample(image.unsqueeze(2)).squeeze(2).to(weight_type)
-        image_latents, features = vae_model.sample(image.unsqueeze(2))
-        image_latents=image_latents.squeeze(2).to(weight_type)
+        image_latents = vae_model.sample(image.unsqueeze(2)).squeeze(2).to(weight_type)
+
         image_embeds_und = model.image_embedder_und(image_latents)
         image_embeds_gen = model.image_embedder_gen(image_latents)
         image_embeds_und = image_embeds_und + model.position_embedding(model.image_position_ids)
         image_embeds_und = model.und_trans(image_embeds_und)['last_hidden_state']
+
+
         image_embeds = model.fusion_proj(torch.cat([image_embeds_und, image_embeds_gen], dim=-1))
+
+        image_embeds = torch.zeros_like(image_embeds)
 
         batch_size = 1
         responses = ['' for j in range(len(file_list))]
         images = [image]
         for j, question in enumerate(config.question):
+
+
             input_ids = text_tokenizer(question, add_special_tokens=False).input_ids
+
+
             text_tokens_a = torch.tensor([showo_token_ids['bos_id']] + sys_prompt_ids + role_a).to(device)[None, :]
             text_tokens_b = torch.tensor([showo_token_ids['boi_id'], showo_token_ids['eoi_id']] + input_ids + role_b).to(device)[None, :]
             text_embeds_a = model.showo.model.embed_tokens(text_tokens_a)
             text_embeds_b = model.showo.model.embed_tokens(text_tokens_b)
-
-
-
 
             if config.model.showo.add_time_embeds:
                 time_embeds = model.time_embed(torch.Tensor([[1.0]]).to(device), text_embeds_a.dtype)
@@ -276,78 +179,16 @@ if __name__ == '__main__':
             output_tokens = torch.stack(output_tokens).squeeze()[None]
 
         text = text_tokenizer.batch_decode(output_tokens, skip_special_tokens=True)
+
+        print("Generated:", text[0], flush=True)
+
         responses[j] += f'User: ' + question + f'\n Answer : ' + text[0] + '\n'
 
-        z_texts.append(output_tokens.squeeze().detach().cpu().numpy())
-        z_images.append(features.squeeze().flatten().detach().cpu().numpy())
-        print('yo')
+        images = torch.cat(images, dim=0)
+        images = denorm(images)
+        pil_images = [Image.fromarray(image) for image in images]
 
-        #
-        # images = torch.cat(images, dim=0)
-        # images = denorm(images)
-        # pil_images = [Image.fromarray(image) for image in images]
-        #
-        # wandb_images = [wandb.Image(image, caption=responses[i]) for i, image in enumerate(pil_images)]
-        # wandb.log({"Multimodal understanding responses": wandb_images}, step=step)
+        wandb_images = [wandb.Image(image, caption=responses[i]) for i, image in enumerate(pil_images)]
+        wandb.log({"Multimodal understanding responses": wandb_images}, step=step)
 
-
-
-    all_feats = z_images
-
-    import numpy as np
-
-
-    # number of unique embeddings
-    print("unique rows:", np.unique(all_feats, axis=0).shape[0])
-
-    # compare with first image
-    for i in range(1, len(all_feats)):
-        diff = np.abs(all_feats[0] - all_feats[i])
-
-        print(f"\nImage 0 vs Image {i}")
-        print("max diff :", diff.max())
-        print("mean diff:", diff.mean())
-        print("all equal:", np.allclose(all_feats[0], all_feats[i]))
-
-
-
-    z_images = np.array(z_images)
-
-    #pad
-    # max_len = max(len(x) for x in z_texts)
-    # z_texts = np.array([
-    #     np.pad(x, (0, max_len - len(x)))
-    #     for x in z_texts
-    # ])
-
-    #pooling
-    import torch
-    import torch.nn as nn
-    import numpy as np
-
-
-    target_len = min(len(x) for x in z_texts)
-
-    pool = nn.AdaptiveAvgPool1d(target_len)
-
-    processed = []
-
-    for arr in z_texts:
-        x = torch.tensor(arr, dtype=torch.float32)
-
-        # shape: (N,C,L) or (C,L)
-        x = x.unsqueeze(0).unsqueeze(0)
-
-        x = pool(x)
-
-        x = x.squeeze().numpy()
-
-        processed.append(x)
-
-    z_texts = np.stack(processed)
-
-    print(z_texts.shape)
-    print(z_images.shape)
-
-    tsne_calc(z_images, z_texts)
 
