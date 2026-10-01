@@ -38,6 +38,6 @@ COPY models/Showo/configs /app/configs
 
 COPY api/prompt.txt /app/api/prompt.txt
 
-EXPOSE 4523
+EXPOSE 8000
 
 CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]

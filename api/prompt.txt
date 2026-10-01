@@ -1,4 +1,4 @@
-Με αυτο το prompt: Analyze this image for investigation-relevant information.
+Analyze this image for investigation-relevant information.
 
 Describe ONLY objects relevant from an investigation perspective.
 Infer what the scene could mean from an investigative/security perspective.

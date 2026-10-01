@@ -1,6 +1,7 @@
 services:
   api:
     build: .
+    image: cmalign-api:v1
     container_name: multimodal-api
     ports:
       - "8000:8000"
