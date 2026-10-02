@@ -1,53 +1,51 @@
-from fastapi import FastAPI, UploadFile,  Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import FastAPI, UploadFile
 from pydantic import BaseModel
 from PIL import Image
 import io
 import os
-
+from pathlib import Path
 
 import datetime
 from contextlib import asynccontextmanager
 
-from models.showo2_service import Showo2Service
-from models.Showo.show_o2.utils import get_config
+from models.showo2_qwen3_service import Showo2Qwen3Service
 
-# ---- Globals for model ----
-model = None
-tokenizer = None
+PROMPT_FILE = (
+    Path(__file__).resolve().parent
+    / "prompt_init.txt"
+)
 
-#config = get_config("configs/showo_demo_w_clip_vit_512x512.yaml")
-config = get_config()
+WAN_VAE_PATH = os.getenv(
+    "WAN_VAE_PATH",
+    "checkpoints/Wan2.1_VAE.pth",
+)
 
+SHOWO_STAGE2_CHECKPOINT = os.getenv(
+    "SHOWO_STAGE2_CHECKPOINT",
+    "checkpoints/showo2_qwen3_stage2.pt",
+)
 
-showo = Showo2Service(config)
+FUSION_ALPHA = float(
+    os.getenv(
+        "FUSION_ALPHA",
+        "0.5",
+    )
+)
+
+showo = Showo2Qwen3Service(
+    wan_vae_path=WAN_VAE_PATH,
+    stage2_checkpoint=SHOWO_STAGE2_CHECKPOINT,
+)
 
 app = FastAPI(title="Multimodal Image API")
-
-# Use an environment variable in practice
-API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN", "my-secret-token")
-
-security = HTTPBearer()
-
-def verify_bearer_token(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> str:
-    token = credentials.credentials
-
-    if token != API_BEARER_TOKEN:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or missing bearer token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return token
 
 # ---- Routes ----
 
 @app.get("/")
-async def root(token: str = Depends(verify_bearer_token)):
-    return {"message": "API is running and authenticated"}
+async def root():
+    return {
+        "message": "API is running"
+    }
 
 
 # ---- Request model ----
@@ -60,67 +58,21 @@ async def image_to_text(file: UploadFile):
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes))
 
-    prompt_file1 = "/app/api/prompt1.txt"
-    prompt_file2 = "/app/api/prompt2.txt"
+    with open(
+            PROMPT_FILE,
+            "r",
+            encoding="utf-8",
+    ) as f:
+        prompt = f.read()
 
-    with open(prompt_file1, "r", encoding="utf-8") as f:
-        prompt1 = f.read()
-
-    with open(prompt_file2, "r", encoding="utf-8") as f:
-        prompt2 = f.read()
-
-    final_analysis= showo.image_to_text(
-        image,
-        question=prompt1,
-        #question="Please describe this image in detail."
-        # question="Analyze this image for investigation-relevant information. "
-        #
-        #          "Do NOT just describe objects."
-        #          "Infer what the scene could mean from an investigative/security perspective. "
-        #
-        #          "For each finding, output: "
-        #
-        #          "observation, "
-        #          "possible significance,"
-        #          "risk level (low/medium/high), "
-        #          "confidence (low/medium/high), "
-        #
-        #          "Rules: "
-        #          "You may infer plausible threats, criminal activity, concealment, fraud, violence risk, cybercrime relevance,"
-        #          " trafficking/resale indicators, etc.,"
-        #          "Do not state speculation as fact but as inferred hypothesis.,"
-        #          "Keep outputs concise.,"
-        #          "Focus on what would matter to an investigator, analyst, or threat assessor.,"
-        #
-        #          "Output format:"
-        #
-        #          "Observation: ..."
-        #          "Significance: ..."
-        #          "Risk: ..."
-        #          "Confidence: ...,"
-        #
-        #          "Example:"
-        #
-        #          "Observation: Multiple boxed phones with visible serial labels and cash"
-        #          "Significance: May indicate resale activity or potentially stolen-property handling"
-        #          "Risk: Medium"
-        #          "Confidence: Medium",
+    final_analysis = showo.image_to_text(
+        image=image,
+        question=prompt,
+        alpha=FUSION_ALPHA,
         max_new_tokens=384,
-        temperature=0.3,
-        top_k=5,
     )
 
-    # stage_2_prompt = prompt2.format(
-    #     observations=caption1
-    # )
-    #
-    # final_analysis = showo.image_to_text(
-    #     image,
-    #     question=stage_2_prompt,
-    #     max_new_tokens=128,
-    #     temperature=0.1,
-    #     top_k=1,
-    # )
+
 
     date_iso8601=datetime.datetime.now().isoformat()
 
