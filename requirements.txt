@@ -11,6 +11,7 @@ fastapi==0.110.0
 uvicorn[standard]==0.29.0
 python-multipart
 pillow
+streamlit
 
 # ===== ML Core (aligned with Show-o) =====
 #transformers>=4.57.1

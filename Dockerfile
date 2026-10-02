@@ -47,7 +47,7 @@ RUN pip install -r requirements.txt
 
 COPY api ./api
 COPY models ./models
-
+COPY UI ./UI
 
 # ------------------------------------------------------------
 # API

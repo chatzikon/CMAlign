@@ -1,8 +1,21 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    Depends,
+    HTTPException,
+    status,
+)
+
+from fastapi.security import (
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+)
+
 from pydantic import BaseModel
 from PIL import Image
 import io
 import os
+import secrets
 from pathlib import Path
 
 import datetime
@@ -39,12 +52,62 @@ showo = Showo2Qwen3Service(
 
 app = FastAPI(title="Multimodal Image API")
 
+
+
+CMALIGN_API_KEY = os.getenv("CMALIGN_API_KEY")
+
+if not CMALIGN_API_KEY:
+    raise RuntimeError(
+        "CMALIGN_API_KEY environment variable is not set"
+    )
+
+
+bearer_security = HTTPBearer(
+    auto_error=False
+)
+
+
+def verify_api_key(
+    credentials: HTTPAuthorizationCredentials = Depends(
+        bearer_security
+    ),
+):
+
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing API key",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        )
+
+    provided_key = credentials.credentials
+
+    if not secrets.compare_digest(
+        provided_key,
+        CMALIGN_API_KEY,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={
+                "WWW-Authenticate": "Bearer"
+            },
+        )
+
 # ---- Routes ----
 
 @app.get("/")
 async def root():
     return {
         "message": "API is running"
+    }
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok"
     }
 
 
@@ -54,7 +117,10 @@ class TextToImageRequest(BaseModel):
 
 
 @app.post("/image-to-text")
-async def image_to_text(file: UploadFile):
+async def image_to_text(
+    file: UploadFile,
+    _api_key: str = Depends(verify_api_key),
+):
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes))
 

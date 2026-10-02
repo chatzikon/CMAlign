@@ -1,12 +1,9 @@
 services:
 
   api:
-
     build: .
-
     image: cmalign-api:qwen3
-
-    container_name: cmalign-qwen3
+    container_name: cmalign-api
 
     ports:
       - "8000:8000"
@@ -18,23 +15,55 @@ services:
             - capabilities: [gpu]
 
     environment:
+      CMALIGN_API_KEY: ${CMALIGN_API_KEY}
 
       HF_TOKEN: ${HF_TOKEN}
-
       HF_HOME: /hf-cache
 
       WAN_VAE_PATH: /app/checkpoints/Wan2.1_VAE.pth
-
       SHOWO_STAGE2_CHECKPOINT: /app/checkpoints/showo2_qwen3_stage2.pt
 
       FUSION_ALPHA: ${FUSION_ALPHA}
 
     volumes:
-
       - ./checkpoints:/app/checkpoints:ro
-
       - ./hf-cache:/hf-cache
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=3)"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
 
     restart: unless-stopped
 
 
+  ui:
+    image: cmalign-api:qwen3
+    container_name: cmalign-ui
+
+    command:
+      - streamlit
+      - run
+      - UI/app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+
+    ports:
+      - "8501:8501"
+
+    environment:
+      API_URL: http://api:8000
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+    restart: unless-stopped
