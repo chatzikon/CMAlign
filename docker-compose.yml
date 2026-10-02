@@ -1,18 +1,40 @@
 services:
+
   api:
+
     build: .
-    image: cmalign-api:v2
-    container_name: multimodal-api2
+
+    image: cmalign-api:qwen3
+
+    container_name: cmalign-qwen3
+
     ports:
-      - "8001:8001"
+      - "8000:8000"
+
     deploy:
       resources:
         reservations:
           devices:
-            - capabilities: [ gpu ]
+            - capabilities: [gpu]
+
     environment:
-      - API_BEARER_TOKEN=my-secret-token
-      - HF_TOKEN=hf_FdIZNKPcBrzuHeWgDJedQvdHemMaiNeXwYHF_TOKEN=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
+
+      HF_TOKEN: ${HF_TOKEN}
+
+      HF_HOME: /hf-cache
+
+      WAN_VAE_PATH: /app/checkpoints/Wan2.1_VAE.pth
+
+      SHOWO_STAGE2_CHECKPOINT: /app/checkpoints/showo2_qwen3_stage2.pt
+
+      FUSION_ALPHA: ${FUSION_ALPHA}
+
+    volumes:
+
+      - ./checkpoints:/app/checkpoints:ro
+
+      - ./hf-cache:/hf-cache
+
     restart: unless-stopped
 
 

@@ -642,14 +642,8 @@ class WanVAE:
         self.scale = [self.mean, 1.0 / self.std]
 
         # init model
-
-        import os
-        cwd = os.getcwd()
-
-
-
         self.model = _video_vae(
-            pretrained_path=os.path.join(cwd,vae_pth),
+            pretrained_path=vae_pth,
             z_dim=z_dim,
         ).eval().requires_grad_(False).to(device)
 
@@ -657,7 +651,7 @@ class WanVAE:
         with amp.autocast(dtype=self.dtype):
             return self.model.decode(zs, self.scale).float().clamp_(-1, 1)
 
-    def sample(self, videos, deterministic=False, return_features=True):
+    def sample(self, videos, deterministic=False, return_features=False):
         with amp.autocast(dtype=self.dtype):
             if return_features:
                 out, feats = self.model.sample(videos, self.scale, deterministic=deterministic,

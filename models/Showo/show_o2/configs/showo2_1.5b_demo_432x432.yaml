@@ -1,6 +1,3 @@
-mmu_image_path: './docs/mmu'
-question: 'Describe the image in detail'
-
 wandb:
   entity: null
 #  run_id: blvqij6q
@@ -21,7 +18,6 @@ model:
         model_name: "Showo2"
         load_from_showo: True
         pretrained_model_path: "showlab/show-o2-1.5B"
-        #pretrained_model_path: ""
         llm_model_path: "Qwen/Qwen2.5-1.5B-Instruct"
         llm_vocab_size: null # will be updated when setting the tokenizer in other code files
         hidden_size: 1536

@@ -1,7 +1,3 @@
-# Git
-.git
-.gitignore
-
 # Python
 __pycache__/
 *.pyc
@@ -21,6 +17,7 @@ env/
 .cache/
 .huggingface/
 torch_cache/
+hf-cache/
 
 # W&B
 wandb/
@@ -33,6 +30,7 @@ wandb/
 
 # Docker
 docker-compose.override.yml
+.env
 
 
 # Model checkpoints
@@ -42,7 +40,6 @@ checkpoints/
 *.pth
 *.bin
 *.safetensors
-models/Wan2.1_VAE.pth
 
 # Build artifacts
 dist/

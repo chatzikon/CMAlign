@@ -13,7 +13,11 @@ from decord import VideoReader, cpu
 #              config utils
 ##################################################
 def get_config():
-    return OmegaConf.load("./configs/showo2_1.5b_demo_432x432.yaml")
+    cli_conf = OmegaConf.from_cli()
+    yaml_conf = OmegaConf.load(cli_conf.config)
+    conf = OmegaConf.merge(yaml_conf, cli_conf)
+
+    return conf
 
 
 def flatten_omega_conf(cfg: Any, resolve: bool = False) -> List[Tuple[str, Any]]:
@@ -79,7 +83,6 @@ def _freeze_params(model, frozen_params=None):
 path_to_llm_name = {
     "Qwen/Qwen2.5-7B-Instruct": 'qwen2_5',
     "Qwen/Qwen2.5-1.5B-Instruct": 'qwen2_5',
-    "Qwen/Qwen2.5-3B-Instruct": 'qwen2_5',
     "meta-llama/Llama-3.2-1B-Instruct": 'llama3'
 }
 
