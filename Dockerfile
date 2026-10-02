@@ -53,6 +53,6 @@ COPY models ./models
 # API
 # ------------------------------------------------------------
 
-EXPOSE 8001
+EXPOSE 8000
 
-CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["python", "-m", "uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]

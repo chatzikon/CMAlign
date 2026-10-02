@@ -9,7 +9,7 @@ services:
     container_name: cmalign-qwen3
 
     ports:
-      - "8001:8001"
+      - "8000:8000"
 
     deploy:
       resources:
