@@ -486,6 +486,22 @@ class Showo2Qwen3Service:
             "Qwen3-VL is on GPU."
         )
 
+    def _offload_qwen(self):
+
+        print(
+            "Moving Qwen3-VL GPU -> CPU..."
+        )
+
+        self.qwen = self.qwen.to(
+            "cpu"
+        )
+
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
+        print(
+            "Qwen3-VL is back on CPU."
+        )
 
 
     def _load_showo2_visual(self):
