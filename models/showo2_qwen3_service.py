@@ -425,78 +425,10 @@ class Showo2Qwen3Service:
 
         self.vae.device = device
 
-    def _activate_showo2(self):
 
-        print(
-            "\nMoving Show-o2 + WanVAE "
-            "CPU -> GPU..."
-        )
 
-        self.showo_visual = (
-            self.showo_visual.to(
-                device=self.device,
-                dtype=self.dtype,
-            )
-        )
 
-        self._move_vae(
-            self.device
-        )
 
-        print(
-            "Show-o2 + WanVAE are on GPU."
-        )
-
-    def _offload_showo2(self):
-
-        print(
-            "Moving Show-o2 + WanVAE "
-            "GPU -> CPU..."
-        )
-
-        self.showo_visual = (
-            self.showo_visual.to("cpu")
-        )
-
-        self._move_vae("cpu")
-
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
-        print(
-            "Show-o2 + WanVAE are back on CPU."
-        )
-
-    def _activate_qwen(self):
-
-        print(
-            "\nMoving Qwen3-VL CPU -> GPU..."
-        )
-
-        self.qwen = self.qwen.to(
-            self.device
-        )
-
-        print(
-            "Qwen3-VL is on GPU."
-        )
-
-    def _offload_qwen(self):
-
-        print(
-            "Moving Qwen3-VL GPU -> CPU..."
-        )
-
-        self.qwen = self.qwen.to(
-            "cpu"
-        )
-
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
-        print(
-            "Qwen3-VL is back on CPU."
-        )
 
     def _activate_showo2(self):
 
@@ -554,22 +486,7 @@ class Showo2Qwen3Service:
             "Qwen3-VL is on GPU."
         )
 
-    def _offload_qwen(self):
 
-        print(
-            "Moving Qwen3-VL GPU -> CPU..."
-        )
-
-        self.qwen = self.qwen.to(
-            "cpu"
-        )
-
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
-        print(
-            "Qwen3-VL is back on CPU."
-        )
 
     def _load_showo2_visual(self):
 
@@ -627,6 +544,36 @@ class Showo2Qwen3Service:
 
             gc.collect()
 
+    def _extract_showo_features_active(
+            self,
+            image: Image.Image,
+    ):
+
+        image = image.convert("RGB")
+
+        with torch.no_grad():
+            features = get_showo2_features(
+                image,
+                self.showo_visual,
+                self.vae,
+            )
+
+        # Keep the features in bfloat16 on CPU.
+        #
+        # There is no reason to convert them to
+        # float32 for batch inference because they
+        # are converted back to bfloat16 for the
+        # adapter anyway.
+        features = (
+            features
+            .detach()
+            .to(
+                device="cpu",
+                dtype=self.dtype,
+            )
+        )
+
+        return features
 
     def _prepare_qwen_inputs(
         self,
@@ -680,6 +627,193 @@ class Showo2Qwen3Service:
 
         return inputs
 
+    def _generate_from_showo_features_active(
+            self,
+            image: Image.Image,
+            z_showo_raw,
+            question: str,
+            alpha: float,
+            max_new_tokens: int,
+    ):
+
+        beta = 1.0 - alpha
+
+        image = image.convert("RGB")
+
+        qwen = self.qwen
+        processor = self.processor
+
+        # -----------------------------------------
+        # Qwen input
+        # -----------------------------------------
+
+        inputs = self._prepare_qwen_inputs(
+            processor,
+            image,
+            question,
+        )
+
+        # -----------------------------------------
+        # Native Qwen visual features
+        # -----------------------------------------
+
+        with torch.no_grad():
+
+            (
+                native_image_embeds,
+                native_deepstack,
+            ) = qwen.get_image_features(
+                pixel_values=
+                inputs["pixel_values"],
+
+                image_grid_thw=
+                inputs["image_grid_thw"],
+            )
+
+        z_qwen = (
+            native_image_embeds[0]
+            .unsqueeze(0)
+        )
+
+        # -----------------------------------------
+        # Show-o2 feature -> GPU
+        # -----------------------------------------
+
+        z_showo_raw = z_showo_raw.to(
+            device=self.device,
+            dtype=self.dtype,
+        )
+
+        # -----------------------------------------
+        # Spatial alignment
+        # -----------------------------------------
+
+        z_showo_aligned = (
+            spatial_align_showo_to_qwen(
+                z_showo_raw,
+                z_qwen,
+            )
+        )
+
+        # -----------------------------------------
+        # Trained adapter
+        # -----------------------------------------
+
+        with torch.no_grad():
+
+            z_showo_adapted = self.adapter(
+                z_showo_aligned
+            )
+
+        if (
+                z_showo_adapted.shape
+                != z_qwen.shape
+        ):
+            raise RuntimeError(
+                "Cannot fuse representations. "
+                f"Show-o2="
+                f"{tuple(z_showo_adapted.shape)}, "
+                f"Qwen="
+                f"{tuple(z_qwen.shape)}"
+            )
+
+        # -----------------------------------------
+        # Fusion
+        # -----------------------------------------
+
+        fused = (
+                alpha * z_qwen
+                +
+                beta * z_showo_adapted
+        )
+
+        fused = fused.to(
+            device=z_qwen.device,
+            dtype=z_qwen.dtype,
+        )
+
+        # -----------------------------------------
+        # Temporarily replace Qwen's final
+        # visual representation
+        # -----------------------------------------
+
+        original_get_image_features = (
+            qwen.model.get_image_features
+        )
+
+        def fused_get_image_features(
+                model_self,
+                pixel_values,
+                image_grid_thw=None,
+                **kwargs,
+        ):
+
+            return (
+                (fused[0],),
+                native_deepstack,
+            )
+
+        qwen.model.get_image_features = (
+            types.MethodType(
+                fused_get_image_features,
+                qwen.model,
+            )
+        )
+
+        qwen.model.rope_deltas = None
+
+        try:
+
+            with torch.no_grad():
+
+                generated_ids = qwen.generate(
+                    **inputs,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                    use_cache=True,
+                )
+
+            generated_only = generated_ids[
+                :,
+                inputs["input_ids"].shape[1]:
+            ]
+
+            output_text = (
+                processor.batch_decode(
+                    generated_only,
+                    skip_special_tokens=True,
+                    clean_up_tokenization_spaces=False,
+                )[0]
+            )
+
+        finally:
+
+            qwen.model.get_image_features = (
+                original_get_image_features
+            )
+
+            qwen.model.rope_deltas = None
+
+        # Delete per-image GPU tensors.
+        #
+        # We deliberately DON'T call
+        # torch.cuda.empty_cache() here.
+        #
+        # PyTorch can reuse this memory for the
+        # next image, which is more efficient.
+
+        del inputs
+        del native_image_embeds
+        del native_deepstack
+        del z_qwen
+        del z_showo_raw
+        del z_showo_aligned
+        del z_showo_adapted
+        del fused
+        del generated_ids
+        del generated_only
+
+        return output_text.strip()
 
     def extract_qwen_features(
         self,
@@ -775,6 +909,244 @@ class Showo2Qwen3Service:
 
         return features_cpu
 
+    def images_to_text(
+            self,
+            image_paths,
+            question: str,
+            alpha: float = 0.5,
+            max_new_tokens: int = 384,
+            chunk_size: int = 128,
+    ):
+
+        if not 0.0 <= alpha <= 1.0:
+            raise ValueError(
+                "alpha must be between 0.0 and 1.0"
+            )
+
+        if chunk_size < 1:
+            raise ValueError(
+                "chunk_size must be >= 1"
+            )
+
+        with self._inference_lock:
+
+            return self._images_to_text_impl(
+                image_paths=image_paths,
+                question=question,
+                alpha=alpha,
+                max_new_tokens=max_new_tokens,
+                chunk_size=chunk_size,
+            )
+
+    def _images_to_text_impl(
+            self,
+            image_paths,
+            question: str,
+            alpha: float,
+            max_new_tokens: int,
+            chunk_size: int,
+    ):
+
+        image_paths = [
+            Path(path)
+            for path in image_paths
+        ]
+
+        results = [
+            None
+            for _ in image_paths
+        ]
+
+        total = len(image_paths)
+
+        # =========================================
+        # Process one chunk at a time
+        # =========================================
+
+        for chunk_start in range(
+                0,
+                total,
+                chunk_size,
+        ):
+
+            chunk_end = min(
+                chunk_start + chunk_size,
+                total,
+            )
+
+            chunk_paths = image_paths[
+                chunk_start:chunk_end
+            ]
+
+            print(
+                f"\nProcessing images "
+                f"{chunk_start + 1}-{chunk_end} "
+                f"of {total}"
+            )
+
+            chunk_features = [
+                None
+                for _ in chunk_paths
+            ]
+
+            # =====================================
+            # PHASE 1:
+            # SHOW-O2
+            #
+            # Move model ONCE for entire chunk.
+            # =====================================
+
+            self._activate_showo2()
+
+            try:
+
+                for local_index, path in enumerate(
+                        chunk_paths
+                ):
+
+                    global_index = (
+                            chunk_start
+                            + local_index
+                    )
+
+                    try:
+
+                        with Image.open(path) as image:
+
+                            features = (
+                                self
+                                ._extract_showo_features_active(
+                                    image
+                                )
+                            )
+
+                        chunk_features[
+                            local_index
+                        ] = features
+
+                    except Exception as exc:
+
+                        results[
+                            global_index
+                        ] = {
+                            "status": "error",
+                            "error": (
+                                f"{type(exc).__name__}: "
+                                f"{exc}"
+                            ),
+                        }
+
+            finally:
+
+                self._offload_showo2()
+
+                gc.collect()
+
+            # =====================================
+            # PHASE 2:
+            # QWEN
+            #
+            # Only activate Qwen if at least one
+            # image survived Show-o2.
+            # =====================================
+
+            if any(
+                    feature is not None
+                    for feature in chunk_features
+            ):
+
+                self._activate_qwen()
+
+                self.adapter = self.adapter.to(
+                    device=self.device,
+                    dtype=self.dtype,
+                )
+
+                try:
+
+                    for local_index, (
+                            path,
+                            showo_features,
+                    ) in enumerate(
+                        zip(
+                            chunk_paths,
+                            chunk_features,
+                        )
+                    ):
+
+                        if showo_features is None:
+                            continue
+
+                        global_index = (
+                                chunk_start
+                                + local_index
+                        )
+
+                        try:
+
+                            with Image.open(path) as image:
+
+                                caption = (
+                                    self
+                                    ._generate_from_showo_features_active(
+                                        image=image,
+                                        z_showo_raw=
+                                        showo_features,
+                                        question=question,
+                                        alpha=alpha,
+                                        max_new_tokens=
+                                        max_new_tokens,
+                                    )
+                                )
+
+                            results[
+                                global_index
+                            ] = {
+                                "status": "success",
+                                "caption": caption,
+                            }
+
+                        except Exception as exc:
+
+                            results[
+                                global_index
+                            ] = {
+                                "status": "error",
+                                "error": (
+                                    f"{type(exc).__name__}: "
+                                    f"{exc}"
+                                ),
+                            }
+
+                        finally:
+
+                            # Release this image's stored
+                            # Show-o2 representation as soon
+                            # as Qwen has finished with it.
+
+                            chunk_features[
+                                local_index
+                            ] = None
+
+                finally:
+
+                    # Adapter is small, but leave the GPU
+                    # in the same clean state as the rest
+                    # of the service.
+
+                    self.adapter = (
+                        self.adapter.to("cpu")
+                    )
+
+                    self._offload_qwen()
+
+                    gc.collect()
+
+            del chunk_features
+
+            gc.collect()
+
+        return results
 
     def compare_visual_representations(
         self,

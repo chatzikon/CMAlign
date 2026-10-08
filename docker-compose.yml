@@ -35,7 +35,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=3)"
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"
         ]
       interval: 10s
       timeout: 5s
@@ -61,6 +61,8 @@ services:
 
     environment:
       API_URL: http://api:8000
+      CMALIGN_API_KEY: ${CMALIGN_API_KEY}
+
 
     depends_on:
       api:
