@@ -42,3 +42,7 @@ requests==2.31.0
 jaxtyping==0.2.28
 decord
 
+# ===== RAG dependencies =====
+sentence-transformers
+faiss-cpu
+

@@ -16,6 +16,20 @@ from transformers import (
     Qwen3VLForConditionalGeneration,
 )
 
+from models.investigative_rag.inference_support import (
+    OBSERVATION_PROMPT,
+    initialize_rag,
+    retrieve_context,
+    final_prompt,
+)
+
+from models.investigative_rag.structured_output import (
+    structured_prompt,
+    parse_and_validate,
+    render_report,
+    StructuredOutputError,
+)
+
 from models.Showo.show_o2.models import (
     Showo2Qwen2_5,
     WanVAE,
@@ -243,6 +257,19 @@ class Showo2Qwen3Service:
         self.qwen_model = qwen_model
 
         self._inference_lock = threading.Lock()
+
+        self.use_rag = True
+        self.rag_top_k = 8
+        self.rag_min_score = None
+
+        self.rag_retriever = None
+        self.rag_provenance = None
+
+        if self.use_rag:
+            self.rag_retriever, self.rag_provenance = initialize_rag(
+                Path(__file__).resolve().parent / "investigative_rag",
+                top_k=self.rag_top_k,
+            )
 
         # -----------------------------------------
         # Verify required local files exist
