@@ -952,6 +952,78 @@ class Showo2Qwen3Service:
 
         return features_cpu
 
+    def _generate_with_rag(
+            self,
+            image,
+            z_showo_raw,
+            question,
+            alpha,
+    ):
+        # Pass 1: Neutral visual observation
+        observation = self._generate_from_showo_features_active(
+            image=image,
+            z_showo_raw=z_showo_raw,
+            question=OBSERVATION_PROMPT,
+            alpha=alpha,
+            max_new_tokens=300,
+        )
+
+        # Retrieve relevant knowledge
+        context, records = retrieve_context(
+            self.rag_retriever,
+            observation,
+            top_k=self.rag_top_k,
+            min_score=self.rag_min_score,
+        )
+
+        prompt = structured_prompt(
+            final_prompt(question, context),
+            records,
+        )
+
+        # Pass 2: Investigative reasoning
+        raw_output = self._generate_from_showo_features_active(
+            image=image,
+            z_showo_raw=z_showo_raw,
+            question=prompt,
+            alpha=alpha,
+            max_new_tokens=1024,
+        )
+
+        findings = []
+        warnings = []
+        error = None
+
+        try:
+            findings, warnings = parse_and_validate(
+                raw_output, records
+            )
+        except StructuredOutputError as exc:
+            error = str(exc)
+
+        print("\n" + "=" * 60, flush=True)
+        print(
+            render_report(observation, findings, error, raw_output),
+            flush=True,
+        )
+        print("=" * 60 + "\n", flush=True)
+
+        return {
+            "status": "success" if error is None else "error",
+            "caption": render_report(
+                observation, findings, error, raw_output
+            ),
+            "rag_enabled": True,
+            "image_description": observation,
+            "investigative_findings": findings,
+            "retrieved_knowledge": records,
+            "structured_validation_warnings": warnings,
+            "structured_validation_error": error,
+            "raw_model_output": raw_output,
+            "rag_provenance": self.rag_provenance,
+            "error": error,
+        }
+
     def images_to_text(
             self,
             image_paths,
@@ -1027,9 +1099,8 @@ class Showo2Qwen3Service:
                 f"of {total}"
             )
 
-            chunk_features = [
-                None
-                for _ in chunk_paths
+            chunk_features: list[torch.Tensor | None] = [
+                None for _ in chunk_paths
             ]
 
             # =====================================
@@ -1128,26 +1199,26 @@ class Showo2Qwen3Service:
                         try:
 
                             with Image.open(path) as image:
-
-                                caption = (
-                                    self
-                                    ._generate_from_showo_features_active(
+                                if self.use_rag:
+                                    results[global_index] = self._generate_with_rag(
                                         image=image,
-                                        z_showo_raw=
-                                        showo_features,
+                                        z_showo_raw=showo_features,
                                         question=question,
                                         alpha=alpha,
-                                        max_new_tokens=
-                                        max_new_tokens,
                                     )
-                                )
+                                else:
+                                    caption = self._generate_from_showo_features_active(
+                                        image=image,
+                                        z_showo_raw=showo_features,
+                                        question=question,
+                                        alpha=alpha,
+                                        max_new_tokens=max_new_tokens,
+                                    )
 
-                            results[
-                                global_index
-                            ] = {
-                                "status": "success",
-                                "caption": caption,
-                            }
+                                    results[global_index] = {
+                                        "status": "success",
+                                        "caption": caption,
+                                    }
 
                         except Exception as exc:
 

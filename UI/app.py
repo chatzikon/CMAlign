@@ -5,6 +5,57 @@ import requests
 import streamlit as st
 from PIL import Image
 
+def display_rag_results(text):
+    if not text.get("rag_enabled", False):
+        st.success(text.get("caption", ""))
+        return
+
+    st.subheader("Image Description")
+    st.write(text.get("image_description", ""))
+
+    st.subheader("Investigative Findings")
+
+    findings = text.get("investigative_findings", [])
+
+    if not findings:
+        st.info("No applicable knowledge entries identified.")
+
+    risk_colors = {
+        "Low": "green",
+        "Medium": "orange",
+        "High": "red",
+        "Not assessable": "gray",
+    }
+
+    for finding in findings:
+        with st.container(border=True):
+            st.markdown(
+                f"**{finding['vr_id']} — {finding['vr_title']}**"
+            )
+
+            st.markdown("**Observation**")
+            st.write(finding["observation"])
+
+            st.markdown("**Significance**")
+            st.write(finding["significance"])
+
+            col1, col2 = st.columns(2)
+
+            risk = finding["risk"]
+            color = risk_colors.get(risk, "gray")
+
+            col1.markdown(f"**Risk:** :{color}[{risk}]")
+            col2.markdown(f"**Confidence:** {finding['confidence']}")
+
+    with st.expander("Retrieved Knowledge"):
+        st.json(text.get("retrieved_knowledge", []))
+
+    with st.expander("RAG Provenance"):
+        st.json(text.get("rag_provenance", {}))
+
+    for warning in text.get("structured_validation_warnings", []):
+        st.warning(warning)
+
 
 API_URL = os.getenv(
     "API_URL",
@@ -287,6 +338,7 @@ with col2:
 
                     data = response.json()
 
+
                     # ======================================
                     # SINGLE IMAGE RESPONSE
                     #
@@ -309,9 +361,7 @@ with col2:
                             f"### {filename}"
                         )
 
-                        st.success(
-                            caption
-                        )
+                        display_rag_results(data["text"])
 
                     # ======================================
                     # MULTIPLE IMAGES / ZIP RESPONSE
@@ -385,9 +435,7 @@ with col2:
                                     )
                                 )
 
-                                st.success(
-                                    caption
-                                )
+                                display_rag_results(result["text"])
 
                             else:
 
