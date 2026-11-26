@@ -11,9 +11,32 @@ import torch.nn as nn
 import torch.nn.functional as F
 from PIL import Image
 
+import random
+
+from models.qwen3_showo2_deepstack import (
+    load_adapter,
+    unpack_visual,
+    fuse_features,
+    patched_image_features,
+)
+
 from transformers import (
     AutoProcessor,
     Qwen3VLForConditionalGeneration,
+)
+
+from models.investigative_rag.inference_support import (
+    OBSERVATION_PROMPT,
+    initialize_rag,
+    retrieve_context,
+    final_prompt,
+)
+
+from models.investigative_rag.structured_output import (
+    structured_prompt,
+    parse_and_validate,
+    render_report,
+    StructuredOutputError,
 )
 
 from models.Showo.show_o2.models import (
@@ -244,6 +267,19 @@ class Showo2Qwen3Service:
 
         self._inference_lock = threading.Lock()
 
+        self.use_rag = True
+        self.rag_top_k = 8
+        self.rag_min_score = None
+
+        self.rag_retriever = None
+        self.rag_provenance = None
+
+        if self.use_rag:
+            self.rag_retriever, self.rag_provenance = initialize_rag(
+                Path(__file__).resolve().parent / "investigative_rag",
+                top_k=self.rag_top_k,
+            )
+
         # -----------------------------------------
         # Verify required local files exist
         # -----------------------------------------
@@ -302,15 +338,14 @@ class Showo2Qwen3Service:
         # Build adapter
         # -----------------------------------------
 
-        self.adapter = (
-            Showo2ToQwenAdapter()
-        )
-
-        self.adapter.load_state_dict(
-            self.adapter_state
+        self.adapter = load_adapter(
+            checkpoint,
+            device="cpu",
+            dtype=self.dtype,
         )
 
         self.adapter.eval()
+        self.deepstack_indexes = checkpoint["deepstack_indexes"]
 
         print(
             "Adapter loaded successfully."
@@ -398,6 +433,14 @@ class Showo2Qwen3Service:
         print("Qwen3-VL resident on CPU.")
 
         print("\nAll resident models loaded.")
+
+    @staticmethod
+    def _reset_seed():
+        random.seed(42)
+        torch.manual_seed(42)
+
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(42)
 
     def _move_vae(
             self,
@@ -565,6 +608,8 @@ class Showo2Qwen3Service:
             image: Image.Image,
     ):
 
+        self._reset_seed()
+
         image = image.convert("RGB")
 
         with torch.no_grad():
@@ -643,193 +688,76 @@ class Showo2Qwen3Service:
 
         return inputs
 
+    @torch.no_grad()
     def _generate_from_showo_features_active(
             self,
-            image: Image.Image,
+            image,
             z_showo_raw,
-            question: str,
-            alpha: float,
-            max_new_tokens: int,
+            question,
+            alpha,
+            max_new_tokens,
     ):
-
-        beta = 1.0 - alpha
-
-        image = image.convert("RGB")
-
         qwen = self.qwen
         processor = self.processor
 
-        # -----------------------------------------
-        # Qwen input
-        # -----------------------------------------
-
         inputs = self._prepare_qwen_inputs(
             processor,
-            image,
+            image.convert("RGB"),
             question,
         )
 
-        # -----------------------------------------
-        # Native Qwen visual features
-        # -----------------------------------------
-
-        with torch.no_grad():
-
-            (
-                native_image_embeds,
-                native_deepstack,
-            ) = qwen.get_image_features(
-                pixel_values=
-                inputs["pixel_values"],
-
-                image_grid_thw=
-                inputs["image_grid_thw"],
-            )
-
-        z_qwen = (
-            native_image_embeds[0]
-            .unsqueeze(0)
-        )
-
-        # -----------------------------------------
-        # Show-o2 feature -> GPU
-        # -----------------------------------------
-
-        z_showo_raw = z_showo_raw.to(
-            device=self.device,
-            dtype=self.dtype,
-        )
-
-        # -----------------------------------------
-        # Spatial alignment
-        # -----------------------------------------
-
-        z_showo_aligned = (
-            spatial_align_showo_to_qwen(
-                z_showo_raw,
-                z_qwen,
+        embeddings, deep = unpack_visual(
+            qwen.model.get_image_features(
+                pixel_values=inputs["pixel_values"],
+                image_grid_thw=inputs["image_grid_thw"],
             )
         )
 
-        # -----------------------------------------
-        # Trained adapter
-        # -----------------------------------------
+        native = embeddings[0], deep
 
-        with torch.no_grad():
+        if list(qwen.model.visual.deepstack_visual_indexes) != self.deepstack_indexes:
+            raise ValueError("DeepStack indexes differ from checkpoint")
 
-            z_showo_adapted = self.adapter(
-                z_showo_aligned
-            )
+        raw = z_showo_raw.to(native[0])
 
-        if (
-                z_showo_adapted.shape
-                != z_qwen.shape
-        ):
-            raise RuntimeError(
-                "Cannot fuse representations. "
-                f"Show-o2="
-                f"{tuple(z_showo_adapted.shape)}, "
-                f"Qwen="
-                f"{tuple(z_qwen.shape)}"
-            )
-
-        # -----------------------------------------
-        # Fusion
-        # -----------------------------------------
-
-        fused = (
-                alpha * z_qwen
-                +
-                beta * z_showo_adapted
+        aligned = spatial_align_showo_to_qwen(
+            raw,
+            native[0].unsqueeze(0),
         )
 
-        fused = fused.to(
-            device=z_qwen.device,
-            dtype=z_qwen.dtype,
+        final, predicted_deep = self.adapter(aligned)
+
+        adapted = (
+            final[0],
+            [value[0] for value in predicted_deep],
         )
 
-        # -----------------------------------------
-        # Temporarily replace Qwen's final
-        # visual representation
-        # -----------------------------------------
-
-        original_get_image_features = (
-            qwen.model.get_image_features
+        final, fused_deep = fuse_features(
+            native,
+            adapted,
+            alpha,
         )
 
-        def fused_get_image_features(
-                model_self,
-                pixel_values,
-                image_grid_thw=None,
-                **kwargs,
-        ):
+        self._reset_seed()
 
-            return (
-                (fused[0],),
-                native_deepstack,
+        with patched_image_features(qwen, final, fused_deep):
+            generated_ids = qwen.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                do_sample=False,
+                use_cache=True,
             )
 
-        qwen.model.get_image_features = (
-            types.MethodType(
-                fused_get_image_features,
-                qwen.model,
-            )
-        )
+        generated_only = generated_ids[
+            :, inputs["input_ids"].shape[1]:
+        ]
 
-        qwen.model.rope_deltas = None
+        return processor.batch_decode(
+            generated_only,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+        )[0].strip()
 
-        try:
-
-            with torch.no_grad():
-
-                generated_ids = qwen.generate(
-                    **inputs,
-                    max_new_tokens=max_new_tokens,
-                    do_sample=False,
-                    use_cache=True,
-                )
-
-            generated_only = generated_ids[
-                :,
-                inputs["input_ids"].shape[1]:
-            ]
-
-            output_text = (
-                processor.batch_decode(
-                    generated_only,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=False,
-                )[0]
-            )
-
-        finally:
-
-            qwen.model.get_image_features = (
-                original_get_image_features
-            )
-
-            qwen.model.rope_deltas = None
-
-        # Delete per-image GPU tensors.
-        #
-        # We deliberately DON'T call
-        # torch.cuda.empty_cache() here.
-        #
-        # PyTorch can reuse this memory for the
-        # next image, which is more efficient.
-
-        del inputs
-        del native_image_embeds
-        del native_deepstack
-        del z_qwen
-        del z_showo_raw
-        del z_showo_aligned
-        del z_showo_adapted
-        del fused
-        del generated_ids
-        del generated_only
-
-        return output_text.strip()
 
     def extract_qwen_features(
         self,
@@ -925,6 +853,78 @@ class Showo2Qwen3Service:
 
         return features_cpu
 
+    def _generate_with_rag(
+            self,
+            image,
+            z_showo_raw,
+            question,
+            alpha,
+    ):
+        # Pass 1: Neutral visual observation
+        observation = self._generate_from_showo_features_active(
+            image=image,
+            z_showo_raw=z_showo_raw,
+            question=OBSERVATION_PROMPT,
+            alpha=alpha,
+            max_new_tokens=300,
+        )
+
+        # Retrieve relevant knowledge
+        context, records = retrieve_context(
+            self.rag_retriever,
+            observation,
+            top_k=self.rag_top_k,
+            min_score=self.rag_min_score,
+        )
+
+        prompt = structured_prompt(
+            final_prompt(question, context),
+            records,
+        )
+
+        # Pass 2: Investigative reasoning
+        raw_output = self._generate_from_showo_features_active(
+            image=image,
+            z_showo_raw=z_showo_raw,
+            question=prompt,
+            alpha=alpha,
+            max_new_tokens=1024,
+        )
+
+        findings = []
+        warnings = []
+        error = None
+
+        try:
+            findings, warnings = parse_and_validate(
+                raw_output, records
+            )
+        except StructuredOutputError as exc:
+            error = str(exc)
+
+        print("\n" + "=" * 60, flush=True)
+        print(
+            render_report(observation, findings, error, raw_output),
+            flush=True,
+        )
+        print("=" * 60 + "\n", flush=True)
+
+        return {
+            "status": "success" if error is None else "error",
+            "caption": render_report(
+                observation, findings, error, raw_output
+            ),
+            "rag_enabled": True,
+            "image_description": observation,
+            "investigative_findings": findings,
+            "retrieved_knowledge": records,
+            "structured_validation_warnings": warnings,
+            "structured_validation_error": error,
+            "raw_model_output": raw_output,
+            "rag_provenance": self.rag_provenance,
+            "error": error,
+        }
+
     def images_to_text(
             self,
             image_paths,
@@ -1000,9 +1000,8 @@ class Showo2Qwen3Service:
                 f"of {total}"
             )
 
-            chunk_features = [
-                None
-                for _ in chunk_paths
+            chunk_features: list[torch.Tensor | None] = [
+                None for _ in chunk_paths
             ]
 
             # =====================================
@@ -1101,26 +1100,26 @@ class Showo2Qwen3Service:
                         try:
 
                             with Image.open(path) as image:
-
-                                caption = (
-                                    self
-                                    ._generate_from_showo_features_active(
+                                if self.use_rag:
+                                    results[global_index] = self._generate_with_rag(
                                         image=image,
-                                        z_showo_raw=
-                                        showo_features,
+                                        z_showo_raw=showo_features,
                                         question=question,
                                         alpha=alpha,
-                                        max_new_tokens=
-                                        max_new_tokens,
                                     )
-                                )
+                                else:
+                                    caption = self._generate_from_showo_features_active(
+                                        image=image,
+                                        z_showo_raw=showo_features,
+                                        question=question,
+                                        alpha=alpha,
+                                        max_new_tokens=max_new_tokens,
+                                    )
 
-                            results[
-                                global_index
-                            ] = {
-                                "status": "success",
-                                "caption": caption,
-                            }
+                                    results[global_index] = {
+                                        "status": "success",
+                                        "caption": caption,
+                                    }
 
                         except Exception as exc:
 

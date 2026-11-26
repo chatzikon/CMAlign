@@ -32,7 +32,7 @@ from models.showo2_qwen3_service import (
 
 PROMPT_FILE = (
     Path(__file__).resolve().parent
-    / "prompt_init.txt"
+    / "prompt_init_risk.txt"
 )
 
 WAN_VAE_PATH = os.getenv(
@@ -563,10 +563,16 @@ async def image_to_text(
                             "success",
 
                         "text": {
-                            "caption":
-                                caption,
-                        },
-
+                                "caption": caption,
+                                "rag_enabled": model_result.get("rag_enabled", False),
+                                "image_description": model_result.get("image_description"),
+                                "investigative_findings": model_result.get("investigative_findings", []),
+                                "retrieved_knowledge": model_result.get("retrieved_knowledge", []),
+                                "rag_provenance": model_result.get("rag_provenance"),
+                                "structured_validation_warnings": model_result.get(
+                                    "structured_validation_warnings", []
+                                ),
+                            },
                         "image":
                             True,
 
@@ -639,10 +645,7 @@ async def image_to_text(
                 "tool_name":
                     "CMAlign",
 
-                "text": {
-                    "caption":
-                        caption,
-                },
+                "text": result["text"],
 
                 "in_id":
                     "afr55",

@@ -1,0 +1,154 @@
+[
+  {
+    "source_id": "MITRE-ID",
+    "title": "Gather Victim Identity Information (T1589)",
+    "url": "https://attack.mitre.org/techniques/T1589/",
+    "organization": "MITRE ATT&CK",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "MITRE-LOC",
+    "title": "Determine Physical Locations (T1591.001; organizations)",
+    "url": "https://attack.mitre.org/techniques/T1591/001/",
+    "organization": "MITRE ATT&CK",
+    "verification_note": "Organization-focused location reconnaissance only; not a direct match for private homes.",
+    "verification_status": "verified_page_content_2026-11-19"
+  },
+  {
+    "source_id": "MITRE-SOC",
+    "title": "Social Media Reconnaissance (T1593.001)",
+    "url": "https://attack.mitre.org/techniques/T1593/001/",
+    "organization": "MITRE ATT&CK",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "MITRE-IMP",
+    "title": "Social Engineering: Impersonation (T1684.001)",
+    "url": "https://attack.mitre.org/techniques/T1684/001/",
+    "organization": "MITRE ATT&CK",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "ES-ABA",
+    "title": "FAQ about image-based abuse",
+    "url": "https://www.esafety.gov.au/key-topics/image-based-abuse/faq-about-image-based-abuse",
+    "organization": "eSafety Commissioner",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "ES-SEXT",
+    "title": "Dealing with sexual extortion",
+    "url": "https://www.esafety.gov.au/key-topics/image-based-abuse/deal-with-sextortion",
+    "organization": "eSafety Commissioner",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "ES-CHILD",
+    "title": "Privacy and your child",
+    "url": "https://www.esafety.gov.au/parents/issues-and-advice/privacy-child",
+    "organization": "eSafety Commissioner",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "FTC-ROM",
+    "title": "What To Know About Romance Scams",
+    "url": "https://consumer.ftc.gov/articles/what-know-about-romance-scams",
+    "organization": "US Federal Trade Commission",
+    "verification_note": "Verified: false profiles and reverse-image-search advice; does not itself prove any given photo is stolen.",
+    "verification_status": "verified_page_content_2026-11-19"
+  },
+  {
+    "source_id": "NCA-TRAVEL",
+    "title": "Vacation and Travel Cybersecurity Tips",
+    "url": "https://www.staysafeonline.org/articles/vacation-and-travel-security-tips",
+    "organization": "National Cybersecurity Alliance",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "NCA-ACCOUNT",
+    "title": "Protect Yourself from Social Media Account Takeovers",
+    "url": "https://www.staysafeonline.org/articles/protect-yourself-from-social-media-account-takeovers",
+    "organization": "National Cybersecurity Alliance",
+    "verification_note": "Verified: describes profile cloning and impersonation using public photo information.",
+    "verification_status": "verified_page_content_2026-11-19"
+  },
+  {
+    "source_id": "ES-SHARE",
+    "title": "Photo and video sharing",
+    "url": "https://www.esafety.gov.au/key-topics/online-tools-and-features/photo-and-video-sharing",
+    "organization": "eSafety Commissioner",
+    "verification_status": "verified_page_content_2026-11-19",
+    "verification_note": "Source supports general guidance; case-specific visual-risk mapping is analyst interpretation, not source-authored diagnosis."
+  },
+  {
+    "source_id": "ES-FAMILY-SAFE",
+    "title": "Keeping your family safe",
+    "url": "https://www.esafety.gov.au/key-topics/domestic-family-violence/keeping-your-family-safe",
+    "organization": "eSafety Commissioner",
+    "verification_status": "reviewed_page_content_2026-11-23",
+    "verification_note": "Direct guidance that street signs, landmarks, school/club uniforms and home details in photographs/backgrounds can disclose location, in family-violence safety context."
+  },
+  {
+    "source_id": "ASPCA-REPORT",
+    "title": "Recognizing and Reporting Animal Abuse and Neglect",
+    "url": "https://www.aspca.org/investigations-rescue/recognizing-and-reporting-animal-abuse-and-neglect",
+    "organization": "ASPCA",
+    "verification_status": "reviewed_page_content_2026-11-23",
+    "verification_note": "Discusses factual observations and photographic evidence as material when reporting suspected animal neglect; not a photo-only diagnostic criteria."
+  },
+  {
+    "source_id": "ASPCA-HOARD",
+    "title": "Animal Hoarding",
+    "url": "https://www.aspca.org/helping-people-pets/animal-hoarding",
+    "organization": "ASPCA",
+    "verification_status": "reviewed_page_content_2026-11-23",
+    "verification_note": "Discusses welfare conditions including sanitation, shelter and veterinary care; multiple animals alone does not establish hoarding."
+  },
+  {
+    "source_id": "OSHA-VISUAL",
+    "title": "Hazard Identification Training Tool: Visual Hazard Inspection",
+    "url": "https://www.osha.gov/hazfinder/text-version/visual-inspection",
+    "organization": "US OSHA",
+    "verification_status": "reviewed_page_content_2026-11-23",
+    "verification_note": "Provides examples of visible workplace hazards including exposed wiring, frayed cords and missing safeguards."
+  },
+  {
+    "source_id": "ES-LOCATION",
+    "title": "Location sharing",
+    "url": "https://www.esafety.gov.au/key-topics/online-tools-and-features/location-sharing",
+    "organization": "Australian eSafety Commissioner",
+    "verification_status": "reviewed_public_page_2026-11-23",
+    "verification_note": "Discusses information revealing where people have been or often go; not proof of current location from an image."
+  },
+  {
+    "source_id": "UK-PREMISES",
+    "title": "Terrorism (Protection of Premises) Act 2025: statutory guidance",
+    "url": "https://www.gov.uk/government/publications/the-terrorism-protection-of-premises-act-2025/terrorism-protection-of-premises-act-2025-statutory-guidance",
+    "organization": "UK Government",
+    "verification_status": "contextual_reference_2026-11-23",
+    "verification_note": "Concerns qualifying premises, not routine residential exterior photographs. Does not justify a burglary/security-vulnerability claim."
+  },
+  {
+    "source_id": "ES-FAMILY-LOCATION",
+    "title": "Keeping your family safe",
+    "url": "https://www.esafety.gov.au/key-topics/domestic-family-violence/keeping-your-family-safe",
+    "organization": "Australian eSafety Commissioner",
+    "verification_status": "page_checked_2026-11-23",
+    "verification_note": "Explicitly mentions details in photograph backgrounds, including home details, that may make location easier to identify. Does not claim security vulnerabilities."
+  },
+  {
+    "source_id": "UK-NCSC-CAMERA",
+    "title": "Smart security cameras: Using them safely in your home",
+    "url": "https://www.ncsc.gov.uk/guidance/smart-security-cameras-using-them-safely-in-your-home",
+    "organization": "UK National Cyber Security Centre",
+    "verification_status": "page_checked_2026-11-23",
+    "verification_note": "Smart camera device context and possible risks of compromised configurations. A photo showing a camera does not establish compromise or weakness."
+  }
+]
