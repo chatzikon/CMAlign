@@ -21,7 +21,7 @@ services:
       HF_HOME: /hf-cache
 
       WAN_VAE_PATH: /app/checkpoints/Wan2.1_VAE.pth
-      SHOWO_STAGE2_CHECKPOINT: /app/checkpoints/showo2_qwen3_stage2.pt
+      SHOWO_STAGE2_CHECKPOINT: /app/checkpoints/showo2_qwen3_stage1_v2.pt
 
       FUSION_ALPHA: ${FUSION_ALPHA}
 

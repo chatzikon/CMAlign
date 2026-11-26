@@ -32,7 +32,7 @@ from models.showo2_qwen3_service import (
 
 PROMPT_FILE = (
     Path(__file__).resolve().parent
-    / "prompt_init.txt"
+    / "prompt_init_risk.txt"
 )
 
 WAN_VAE_PATH = os.getenv(
