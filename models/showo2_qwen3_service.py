@@ -13,6 +13,8 @@ from PIL import Image
 
 import random
 
+import hashlib
+
 from models.qwen3_showo2_deepstack import (
     load_adapter,
     unpack_visual,
@@ -268,7 +270,7 @@ class Showo2Qwen3Service:
         self._inference_lock = threading.Lock()
 
         self.use_rag = True
-        self.rag_top_k = 8
+        self.rag_top_k = 5
         self.rag_min_score = None
 
         self.rag_retriever = None
@@ -689,19 +691,17 @@ class Showo2Qwen3Service:
         return inputs
 
     @torch.no_grad()
-    def _generate_from_showo_features_active(
+    def _compute_fused_visual_features_active(
             self,
             image,
             z_showo_raw,
             question,
             alpha,
-            max_new_tokens,
     ):
         qwen = self.qwen
-        processor = self.processor
 
         inputs = self._prepare_qwen_inputs(
-            processor,
+            self.processor,
             image.convert("RGB"),
             question,
         )
@@ -738,6 +738,27 @@ class Showo2Qwen3Service:
             alpha,
         )
 
+        return final, fused_deep
+
+
+    @torch.no_grad()
+    def _generate_from_fused_features_active(
+            self,
+            image,
+            question,
+            final,
+            fused_deep,
+            max_new_tokens,
+    ):
+        qwen = self.qwen
+        processor = self.processor
+
+        inputs = self._prepare_qwen_inputs(
+            processor,
+            image.convert("RGB"),
+            question,
+        )
+
         self._reset_seed()
 
         with patched_image_features(qwen, final, fused_deep):
@@ -756,13 +777,40 @@ class Showo2Qwen3Service:
             generated_only,
             skip_special_tokens=True,
             clean_up_tokenization_spaces=False,
-        )[0].strip()
+        )[0]
+
+
+    @torch.no_grad()
+    def _generate_from_showo_features_active(
+            self,
+            image,
+            z_showo_raw,
+            question,
+            alpha,
+            max_new_tokens):
+
+        final, fused_deep = (
+            self._compute_fused_visual_features_active(
+                image=image,
+                z_showo_raw=z_showo_raw,
+                question=question,
+                alpha=alpha,
+            )
+        )
+
+        return self._generate_from_fused_features_active(
+            image=image,
+            question=question,
+            final=final,
+            fused_deep=fused_deep,
+            max_new_tokens=max_new_tokens,
+        )
 
 
     def extract_qwen_features(
-        self,
-        image: Image.Image,
-        prompt: str = "Describe this image.",
+            self,
+            image: Image.Image,
+            prompt: str = "Describe this image.",
     ):
 
         print(
@@ -777,11 +825,8 @@ class Showo2Qwen3Service:
             Qwen3VLForConditionalGeneration
             .from_pretrained(
                 self.qwen_model,
-
                 dtype=self.dtype,
-
                 low_cpu_mem_usage=True,
-
                 attn_implementation="sdpa",
             )
             .to(self.device)
@@ -806,17 +851,11 @@ class Showo2Qwen3Service:
         with torch.no_grad():
             native_image_embeds, native_deepstack = (
                 qwen.get_image_features(
-                    pixel_values=
-                    inputs["pixel_values"],
-
-                    image_grid_thw=
-                    inputs["image_grid_thw"],
+                    pixel_values=inputs["pixel_values"],
+                    image_grid_thw=inputs["image_grid_thw"],
                 )
             )
 
-        # One image only.
-        # native_image_embeds is a tuple/list containing
-        # the visual embeddings for each image.
         qwen_features = (
             native_image_embeds[0]
             .unsqueeze(0)
@@ -824,9 +863,7 @@ class Showo2Qwen3Service:
 
         print(
             "Qwen3 feature shape:",
-            tuple(
-                qwen_features.shape
-            ),
+            tuple(qwen_features.shape),
         )
 
         features_cpu = (
@@ -860,12 +897,22 @@ class Showo2Qwen3Service:
             question,
             alpha,
     ):
+        # Compute fused visual representations ONCE.
+        final, fused_deep = (
+            self._compute_fused_visual_features_active(
+                image=image,
+                z_showo_raw=z_showo_raw,
+                question=question,
+                alpha=alpha,
+            )
+        )
+
         # Pass 1: Neutral visual observation
-        observation = self._generate_from_showo_features_active(
+        observation = self._generate_from_fused_features_active(
             image=image,
-            z_showo_raw=z_showo_raw,
             question=OBSERVATION_PROMPT,
-            alpha=alpha,
+            final=final,
+            fused_deep=fused_deep,
             max_new_tokens=300,
         )
 
@@ -882,12 +929,16 @@ class Showo2Qwen3Service:
             records,
         )
 
+
+
+
         # Pass 2: Investigative reasoning
-        raw_output = self._generate_from_showo_features_active(
+        # Reuse exactly the same fused visual representations.
+        raw_output = self._generate_from_fused_features_active(
             image=image,
-            z_showo_raw=z_showo_raw,
             question=prompt,
-            alpha=alpha,
+            final=final,
+            fused_deep=fused_deep,
             max_new_tokens=1024,
         )
 

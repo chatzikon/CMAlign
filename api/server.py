@@ -42,7 +42,7 @@ WAN_VAE_PATH = os.getenv(
 
 SHOWO_STAGE2_CHECKPOINT = os.getenv(
     "SHOWO_STAGE2_CHECKPOINT",
-    "checkpoints/showo2_qwen3_stage2.pt",
+    "checkpoints/showo2_qwen3_stage1_v2.pt",
 )
 
 FUSION_ALPHA = float(
@@ -493,7 +493,7 @@ async def image_to_text(
             encoding="utf-8",
         ) as f:
 
-            prompt = f.read()
+            prompt = f.read().strip()
 
 
         # ==================================================
